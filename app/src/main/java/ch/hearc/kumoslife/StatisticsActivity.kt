@@ -2,27 +2,34 @@ package ch.hearc.kumoslife
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
-class StatisticsActivity : AppCompatActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_statistics)
+class StatisticsActivity : AppCompatActivity()
+{
+	lateinit var adapter: StatisticAdapter
 
-        // TODO Take a list from Kumo's stats directly !
-        val dataList: ArrayList<Statistic> = ArrayList<Statistic>()
-        dataList.add(Statistic("Hunger", 12))
-        dataList.add(Statistic("Thirst", 50))
-        dataList.add(Statistic("Activity", 30))
-        dataList.add(Statistic("Sleep", 0))
-        dataList.add(Statistic("Sickness", 80))
+	override fun onCreate(savedInstanceState: Bundle?)
+	{
+		super.onCreate(savedInstanceState)
+		setContentView(R.layout.activity_statistics)
+		val kumoFragment: KumoFragment = KumoFragment.getInstance()
+		kumoFragment.setStat("Hunger", 12)
+		kumoFragment.setStat("Thirst", 50)
+		kumoFragment.setStat("Activity", 30)
+		kumoFragment.setStat("Sleep", 0)
+		kumoFragment.setStat("Sickness", 80)
 
-        val adapter = StatisticAdapter()
-        adapter.setData(dataList)
-        val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = adapter
-    }
+		adapter = StatisticAdapter()
+		adapter.setData(kumoFragment.getStats())
+		val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
+		recyclerView.stopScroll()
+		recyclerView.layoutManager = LinearLayoutManager(this)
+		recyclerView.adapter = adapter
+	}
+
+	override fun onSaveInstanceState(savedInstanceState: Bundle)
+	{
+		super.onSaveInstanceState(savedInstanceState)		//        savedInstanceState.putStringArrayList("namesList", adapter.)
+	}
 }

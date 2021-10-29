@@ -1,15 +1,18 @@
 package ch.hearc.kumoslife;
 
-import androidx.annotation.NonNull;
-
 public class Statistic
 {
     private final String name;
-    private final int value;
+    private int value;
 
     public Statistic(String name, int value)
     {
         this.name = name;
+        this.value = value;
+    }
+
+    public void setValue(int value)
+    {
         this.value = value;
     }
 

@@ -5,7 +5,9 @@
       <map>
         <entry key="..\:/dev/Android/KumosLife/app/src/main/res/layout/activity_main.xml" value="0.2" />
         <entry key="..\:/dev/Mobile/Kumo-s-Life/app/src/main/res/layout/activity_main.xml" value="0.13020833333333334" />
+        <entry key="..\:/dev/Mobile/Kumo-s-Life/app/src/main/res/layout/activity_statistics.xml" value="0.25416666666666665" />
         <entry key="..\:/dev/Mobile/Kumo-s-Life/app/src/main/res/layout/activity_stats_activty.xml" value="0.25416666666666665" />
+        <entry key="..\:/dev/Mobile/Kumo-s-Life/app/src/main/res/layout/fragment_kumo.xml" value="0.25416666666666665" />
         <entry key="..\:/dev/Mobile/Kumo-s-Life/app/src/main/res/layout/stats_item.xml" value="0.25416666666666665" />
       </map>
     </option>
