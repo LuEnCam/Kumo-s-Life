@@ -6,9 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 
-class KumoFragment : Fragment()
+class KumoFragment() : Fragment()
 {
-	private var statsList: ArrayList<Statistic> = ArrayList<Statistic>()
+	private var statsList: ArrayList<Statistic> = ArrayList()
 
 	// Static instance: singleton
 	companion object
@@ -24,12 +24,26 @@ class KumoFragment : Fragment()
 		}
 	}
 
+	init
+	{
+		setStat("Hunger")
+		setStat("Thirst")
+		setStat("Activity")
+		setStat("Sleep")
+		setStat("Sickness", 80)
+	}
+
+	override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
+	{
+		return inflater.inflate(R.layout.fragment_kumo, container, false)
+	}
+
 	fun getStats(): ArrayList<Statistic>
 	{
 		return statsList
 	}
 
-	fun setStat(name: String, value: Int)
+	fun setStat(name: String, value: Int = 0)
 	{
 		for (statistic in statsList)
 		{
@@ -40,10 +54,5 @@ class KumoFragment : Fragment()
 			}
 		}
 		statsList.add(Statistic(name, value))
-	}
-
-	override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
-	{
-		return inflater.inflate(R.layout.fragment_kumo, container, false)
 	}
 }

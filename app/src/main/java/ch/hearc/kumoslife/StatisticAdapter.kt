@@ -11,12 +11,12 @@ import kotlin.collections.ArrayList
 
 class StatisticAdapter() : RecyclerView.Adapter<StatisticAdapter.ViewHolder>()
 {
-	private var dataList: ArrayList<Statistic> = ArrayList<Statistic>()
+	private var dataList: ArrayList<Statistic> = ArrayList()
 
 	class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
 	{
-		val progressBar: ProgressBar = itemView.findViewById<ProgressBar>(R.id.progressBarStats)
-		val name: TextView = itemView.findViewById<TextView>(R.id.nameTextStats)
+		val progressBar: ProgressBar = itemView.findViewById(R.id.progressBarStats)
+		val name: TextView = itemView.findViewById(R.id.nameTextStats)
 	}
 
 	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder
