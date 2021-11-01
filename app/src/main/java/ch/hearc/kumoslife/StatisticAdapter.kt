@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.math.roundToInt
 
 class StatisticAdapter() : RecyclerView.Adapter<StatisticAdapter.ViewHolder>()
 {
@@ -30,7 +31,7 @@ class StatisticAdapter() : RecyclerView.Adapter<StatisticAdapter.ViewHolder>()
 	override fun onBindViewHolder(holder: ViewHolder, position: Int)
 	{
 		val data = dataList[position]
-		holder.progressBar.progress = data.value
+		holder.progressBar.progress = data.value.roundToInt()
 		holder.name.text = data.name
 	}
 

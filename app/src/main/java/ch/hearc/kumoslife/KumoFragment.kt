@@ -5,6 +5,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import java.util.*
+import kotlin.collections.ArrayList
 
 class KumoFragment() : Fragment()
 {
@@ -24,13 +26,27 @@ class KumoFragment() : Fragment()
 		}
 	}
 
+	class StatisticsTask() : TimerTask()
+	{
+		override fun run()
+		{
+			for (stat in KumoFragment.getInstance().statsList)
+			{
+				stat.progress()
+			}
+		}
+	}
+
 	init
 	{
-		setStat("Hunger")
+		setStat("Hunger", progress = 0.3)
 		setStat("Thirst")
-		setStat("Activity")
-		setStat("Sleep")
-		setStat("Sickness", 80)
+		setStat("Activity", progress = 2.0)
+		setStat("Sleep", progress = 0.1)
+		setStat("Sickness", 80.0)
+
+		val timer = Timer()
+		timer.schedule(StatisticsTask(), 0, 60*1000)
 	}
 
 	override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
@@ -43,16 +59,8 @@ class KumoFragment() : Fragment()
 		return statsList
 	}
 
-	fun setStat(name: String, value: Int = 0)
+	fun setStat(name: String, value: Double = 0.0, progress: Double = 1.0)
 	{
-		for (statistic in statsList)
-		{
-			if (name == statistic.name)
-			{
-				statistic.value = value
-				return
-			}
-		}
-		statsList.add(Statistic(name, value))
+		statsList.add(Statistic(name, value, progress))
 	}
 }
