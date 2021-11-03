@@ -37,12 +37,20 @@
 <!--        app:layout_constraintTop_toTopOf="@+id/kumoImageView"-->
 <!--        app:srcCompat="@drawable/ic_launcher_foreground" />-->
 
+    <VideoView
+        android:id="@+id/mainBgVideo"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <fragment
-        android:id="@+id/titleFragment"
+        android:id="@+id/mainKumoFragment"
         android:name="ch.hearc.kumoslife.KumoFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
+        android:layout_height="match_parent" />
 
     <Button
         android:id="@+id/mainToStatisticsButton"
