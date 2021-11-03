@@ -1,11 +1,12 @@
-package ch.hearc.kumoslife
+package ch.hearc.kumoslife.statistics
 
-import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import ch.hearc.kumoslife.KumoFragment
+import ch.hearc.kumoslife.R
 
 class StatisticsActivity : AppCompatActivity()
 {

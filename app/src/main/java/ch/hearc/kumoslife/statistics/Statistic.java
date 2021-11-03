@@ -1,4 +1,4 @@
-package ch.hearc.kumoslife;
+package ch.hearc.kumoslife.statistics;
 
 public class Statistic
 {

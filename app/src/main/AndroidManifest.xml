@@ -10,7 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.KumosLife">
         <activity
-            android:name=".StatisticsActivity"
+            android:name=".statistics.StatisticsActivity"
             android:exported="false">
         </activity>
         <activity

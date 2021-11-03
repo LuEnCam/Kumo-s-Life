@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:layout_margin="32dp"
     android:orientation="vertical"
-    tools:context=".StatisticsActivity">
+    tools:context=".statistics.StatisticsActivity">
 
     <LinearLayout
         android:orientation="horizontal"

@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import ch.hearc.kumoslife.statistics.Statistic
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -46,7 +47,7 @@ class KumoFragment() : Fragment()
 		setStat("Sickness", 80.0)
 
 		val timer = Timer()
-		timer.schedule(StatisticsTask(), 0, 60*1000)
+		timer.schedule(StatisticsTask(), 0, 60 * 1000)
 	}
 
 	override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?

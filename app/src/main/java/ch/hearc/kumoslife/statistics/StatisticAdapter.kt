@@ -1,4 +1,4 @@
-package ch.hearc.kumoslife
+package ch.hearc.kumoslife.statistics
 
 import android.view.LayoutInflater
 import android.view.View
@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import java.util.*
+import ch.hearc.kumoslife.R
 import kotlin.collections.ArrayList
 import kotlin.math.roundToInt
 
