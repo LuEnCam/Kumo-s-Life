@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
+import ch.hearc.kumoslife.shop.ShopActivity
 import ch.hearc.kumoslife.statistics.StatisticsActivity
 
 class MainActivity : AppCompatActivity()
@@ -14,7 +15,7 @@ class MainActivity : AppCompatActivity()
 		setContentView(R.layout.activity_main)
 
 		findViewById<Button>(R.id.mainToStatisticsButton).setOnClickListener() {
-			intent = Intent(this, StatisticsActivity::class.java)
+			intent = Intent(this, ShopActivity::class.java)
 			startActivity(intent)
 		}
 	}
