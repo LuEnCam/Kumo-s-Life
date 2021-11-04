@@ -6,56 +6,21 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <ImageView
-        android:id="@+id/imageviewGIF"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.499"
-        android:scaleType="fitXY"
-        android:adjustViewBounds="true"
-        tools:srcCompat="@tools:sample/avatars" />
-s
-    <ch.hearc.kumoslife.SpriteView
-        android:id="@+id/kumo_spriteView"
-        android:layout_width="260dp"
-        android:layout_height="260dp"
-        app:columns="3"
-        app:fps="3"
-        app:isFixedRow="true"
-        app:rows="3"
-        app:renderRow="0"
-        app:lastFrame="3"
+    <VideoView
+        android:id="@+id/mainBgVideo"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:src="@raw/spritekumo" />
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageView
-        android:id="@+id/eyes_imageView"
-        android:layout_width="260dp"
-        android:layout_height="260dp"
-        app:layout_constraintBottom_toBottomOf="@+id/kumo_spriteView"
-        app:layout_constraintEnd_toEndOf="@+id/kumo_spriteView"
-        app:layout_constraintStart_toStartOf="@+id/kumo_spriteView"
-        app:layout_constraintTop_toTopOf="@+id/kumo_spriteView"
-        tools:srcCompat="@raw/eye" />
-
-    <ImageView
-        android:id="@+id/mouth_imageView"
-        android:layout_width="260dp"
-        android:layout_height="260dp"
-        app:layout_constraintBottom_toBottomOf="@+id/kumo_spriteView"
-        app:layout_constraintEnd_toEndOf="@+id/kumo_spriteView"
-        app:layout_constraintStart_toStartOf="@+id/kumo_spriteView"
-        app:layout_constraintTop_toTopOf="@+id/kumo_spriteView"
-        tools:srcCompat="@drawable/mouth_happy_white" />
-
+    <fragment
+        android:id="@+id/mainKumoFragment"
+        android:name="ch.hearc.kumoslife.KumoFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+    
     <Button
         android:id="@+id/btGetLocation"
         android:layout_width="match_parent"
@@ -75,22 +40,6 @@ s
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btGetLocation" />
-
-
-    <VideoView
-        android:id="@+id/mainBgVideo"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <fragment
-        android:id="@+id/mainKumoFragment"
-        android:name="ch.hearc.kumoslife.KumoFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
 
     <Button
         android:id="@+id/mainToStatisticsButton"
