@@ -24,6 +24,12 @@ import org.json.JSONObject
 import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.*
+import android.content.Intent
+import ch.hearc.kumoslife.statistics.StatisticsActivity
+import android.widget.VideoView
+import android.media.MediaPlayer
+import android.media.MediaPlayer.OnPreparedListener
+import android.util.Log
 
 class MainActivity : AppCompatActivity()
 {
@@ -31,6 +37,8 @@ class MainActivity : AppCompatActivity()
 	private lateinit var fusedLocationClient: FusedLocationProviderClient
 	var latitude: Double = 0.0
 	var longitude: Double = 0.0
+	private val resPath: String = "android.resource://ch.hearc.kumoslife/"
+	private lateinit var bgVideoView: VideoView
 
 	var place = ""
 	val API = "9d783bddf8b3eaa718e7d926a18ccb1c"
@@ -57,6 +65,22 @@ class MainActivity : AppCompatActivity()
 		Glide.with(this).load(R.raw.rain).into(backgroundImageView)
 		Glide.with(this).load(R.raw.eye).into(eyesImageView)
 		Glide.with(this).load(R.drawable.mouth_happy_white).into(mouthImageView)
+
+		// Background video
+		bgVideoView = findViewById(R.id.mainBgVideo)
+		bgVideoView.setVideoPath(resPath + R.raw.night)
+		bgVideoView.setOnPreparedListener { mp ->
+			mp.isLooping = true
+			mp.setVolume(0.0F, 0.0F)
+		}
+		bgVideoView.start()
+
+		// Statistics
+		findViewById<Button>(R.id.mainToStatisticsButton).setOnClickListener() {
+			intent = Intent(this, StatisticsActivity::class.java)
+			startActivity(intent)
+		}
+	}
 
 	}
 
@@ -162,7 +186,8 @@ class MainActivity : AppCompatActivity()
 			}
 
 		}
+
+	override fun onResume() {
+		super.onResume()
+		bgVideoView.start()
 	}
-
-
-}
