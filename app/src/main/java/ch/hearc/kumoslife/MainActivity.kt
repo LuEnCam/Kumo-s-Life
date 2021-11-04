@@ -2,6 +2,10 @@ package ch.hearc.kumoslife
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.content.res.Resources
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Picture
 import android.net.Uri
 import android.os.AsyncTask
 import androidx.appcompat.app.AppCompatActivity
@@ -12,6 +16,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import androidx.core.graphics.drawable.toBitmap
 import com.bumptech.glide.Glide
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -42,14 +47,17 @@ class MainActivity : AppCompatActivity()
 		}
 
 		//
-		//val backgroundImageView = findViewById<ImageView>(R.id.imageviewGIF)
-		val cloudImageView 		= findViewById<ImageView>(R.id.kumoImageView)
-		val eyesImageView 		= findViewById<ImageView>(R.id.eyesImageView)
+		val backgroundImageView = findViewById<ImageView>(R.id.imageviewGIF)
+		val cloudSpriteView 	= findViewById<SpriteView>(R.id.kumo_spriteView)
+		val eyesImageView 		= findViewById<ImageView>(R.id.eyes_imageView)
+		val mouthImageView 		= findViewById<ImageView>(R.id.mouth_imageView)
+
 
 		// Adding the drawables (images + gifs) to the ImageViews with Glade
-		//Glide.with(this).load(R.drawable.rain).into(backgroundImageView);
-		Glide.with(this).load(R.drawable.kumo_cloud).into(cloudImageView);
-		Glide.with(this).load(R.drawable.eye).into(eyesImageView);
+		Glide.with(this).load(R.raw.rain).into(backgroundImageView)
+		Glide.with(this).load(R.raw.eye).into(eyesImageView)
+		Glide.with(this).load(R.drawable.mouth_happy_white).into(mouthImageView)
+
 	}
 
 	private fun getCurrentLocation() {
@@ -139,11 +147,11 @@ class MainActivity : AppCompatActivity()
 				*/
 
 				when (weatherID) {
-					"Fog" 	-> Glide.with(mainActivity).load(R.drawable.fog).into(findViewById<ImageView>(R.id.imageviewGIF));
-					"Rain" 	-> Glide.with(mainActivity).load(R.drawable.rain).into(findViewById<ImageView>(R.id.imageviewGIF));
-					"Snow" 	-> Glide.with(mainActivity).load(R.drawable.snow).into(findViewById<ImageView>(R.id.imageviewGIF));
+					"Fog" 	-> Glide.with(mainActivity).load(R.raw.fog).into(findViewById<ImageView>(R.id.imageviewGIF));
+					"Rain" 	-> Glide.with(mainActivity).load(R.raw.rain).into(findViewById<ImageView>(R.id.imageviewGIF));
+					"Snow" 	-> Glide.with(mainActivity).load(R.raw.snow).into(findViewById<ImageView>(R.id.imageviewGIF));
 					else -> { // Note the block
-						Glide.with(mainActivity).load(R.drawable.snow).into(findViewById<ImageView>(R.id.imageviewGIF));
+						Glide.with(mainActivity).load(R.raw.snow).into(findViewById<ImageView>(R.id.imageviewGIF));
 					}
 				}
 
