@@ -6,36 +6,76 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-<!--    <ImageView-->
-<!--        android:id="@+id/backgroundImageView"-->
-<!--        android:layout_width="0dp"-->
-<!--        android:layout_height="0dp"-->
-<!--        android:scaleType="centerCrop"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="parent"-->
-<!--        tools:srcCompat="@tools:sample/backgrounds/scenic" />-->
+    <ImageView
+        android:id="@+id/imageviewGIF"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.499"
+        android:scaleType="fitXY"
+        android:adjustViewBounds="true"
+        tools:srcCompat="@tools:sample/avatars" />
+s
+    <ch.hearc.kumoslife.SpriteView
+        android:id="@+id/kumo_spriteView"
+        android:layout_width="260dp"
+        android:layout_height="260dp"
+        app:columns="3"
+        app:fps="3"
+        app:isFixedRow="true"
+        app:rows="3"
+        app:renderRow="0"
+        app:lastFrame="3"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:src="@raw/spritekumo" />
 
-<!--    <ImageView-->
-<!--        android:id="@+id/kumoImageView"-->
-<!--        android:layout_width="260dp"-->
-<!--        android:layout_height="260dp"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="parent"-->
-<!--        tools:srcCompat="@tools:sample/avatars" />-->
+    <ImageView
+        android:id="@+id/eyes_imageView"
+        android:layout_width="260dp"
+        android:layout_height="260dp"
+        app:layout_constraintBottom_toBottomOf="@+id/kumo_spriteView"
+        app:layout_constraintEnd_toEndOf="@+id/kumo_spriteView"
+        app:layout_constraintStart_toStartOf="@+id/kumo_spriteView"
+        app:layout_constraintTop_toTopOf="@+id/kumo_spriteView"
+        tools:srcCompat="@raw/eye" />
 
-<!--    <ImageView-->
-<!--        android:id="@+id/eyesImageView"-->
-<!--        android:layout_width="0dp"-->
-<!--        android:layout_height="0dp"-->
-<!--        app:layout_constraintBottom_toBottomOf="@+id/kumoImageView"-->
-<!--        app:layout_constraintEnd_toEndOf="@+id/kumoImageView"-->
-<!--        app:layout_constraintStart_toStartOf="@+id/kumoImageView"-->
-<!--        app:layout_constraintTop_toTopOf="@+id/kumoImageView"-->
-<!--        app:srcCompat="@drawable/ic_launcher_foreground" />-->
+    <ImageView
+        android:id="@+id/mouth_imageView"
+        android:layout_width="260dp"
+        android:layout_height="260dp"
+        app:layout_constraintBottom_toBottomOf="@+id/kumo_spriteView"
+        app:layout_constraintEnd_toEndOf="@+id/kumo_spriteView"
+        app:layout_constraintStart_toStartOf="@+id/kumo_spriteView"
+        app:layout_constraintTop_toTopOf="@+id/kumo_spriteView"
+        tools:srcCompat="@drawable/mouth_happy_white" />
+
+    <Button
+        android:id="@+id/btGetLocation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="Get Current Location"
+        android:textColor="@android:color/white"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteX="30dp" />
+
+    <TextView
+        android:id="@+id/textView_weater_main"
+        android:layout_width="0dp"
+        android:layout_height="27dp"
+        android:layout_marginTop="5dp"
+        android:text="TextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btGetLocation" />
+
 
     <VideoView
         android:id="@+id/mainBgVideo"
