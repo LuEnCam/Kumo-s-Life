@@ -2,21 +2,14 @@ package ch.hearc.kumoslife
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.content.res.Resources
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Picture
-import android.net.Uri
 import android.os.AsyncTask
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
-import androidx.core.graphics.drawable.toBitmap
 import com.bumptech.glide.Glide
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -27,12 +20,8 @@ import java.util.*
 import android.content.Intent
 import ch.hearc.kumoslife.statistics.StatisticsActivity
 import android.widget.VideoView
-import android.media.MediaPlayer
-import android.media.MediaPlayer.OnPreparedListener
-import android.util.Log
 
-class MainActivity : AppCompatActivity()
-{
+class MainActivity : AppCompatActivity() {
 	private val LOCATION_PERMISSION_REQ_CODE = 1000;
 	private lateinit var fusedLocationClient: FusedLocationProviderClient
 	var latitude: Double = 0.0
@@ -43,8 +32,7 @@ class MainActivity : AppCompatActivity()
 	var place = ""
 	val API = "9d783bddf8b3eaa718e7d926a18ccb1c"
 
-	override fun onCreate(savedInstanceState: Bundle?)
-	{
+	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.activity_main)
 
@@ -55,20 +43,18 @@ class MainActivity : AppCompatActivity()
 		}
 
 		//
-		val backgroundImageView = findViewById<ImageView>(R.id.imageviewGIF)
-		val cloudSpriteView 	= findViewById<SpriteView>(R.id.kumo_spriteView)
-		val eyesImageView 		= findViewById<ImageView>(R.id.eyes_imageView)
-		val mouthImageView 		= findViewById<ImageView>(R.id.mouth_imageView)
+		val cloudSpriteView = findViewById<SpriteView>(R.id.kumo_spriteView)
+		val eyesImageView = findViewById<ImageView>(R.id.eyes_imageView)
+		val mouthImageView = findViewById<ImageView>(R.id.mouth_imageView)
 
 
 		// Adding the drawables (images + gifs) to the ImageViews with Glade
-		Glide.with(this).load(R.raw.rain).into(backgroundImageView)
 		Glide.with(this).load(R.raw.eye).into(eyesImageView)
 		Glide.with(this).load(R.drawable.mouth_happy_white).into(mouthImageView)
 
 		// Background video
 		bgVideoView = findViewById(R.id.mainBgVideo)
-		bgVideoView.setVideoPath(resPath + R.raw.night)
+		bgVideoView.setVideoPath(resPath + R.raw.day)
 		bgVideoView.setOnPreparedListener { mp ->
 			mp.isLooping = true
 			mp.setVolume(0.0F, 0.0F)
@@ -82,15 +68,18 @@ class MainActivity : AppCompatActivity()
 		}
 	}
 
-	}
-
 	private fun getCurrentLocation() {
 		// checking location permission
-		if (ActivityCompat.checkSelfPermission(this,
-				Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+		if (ActivityCompat.checkSelfPermission(
+				this,
+				Manifest.permission.ACCESS_FINE_LOCATION
+			) != PackageManager.PERMISSION_GRANTED
+		) {
 			// request permission
-			ActivityCompat.requestPermissions(this,
-				arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQ_CODE);
+			ActivityCompat.requestPermissions(
+				this,
+				arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQ_CODE
+			);
 			return
 		}
 		fusedLocationClient.lastLocation
@@ -103,21 +92,24 @@ class MainActivity : AppCompatActivity()
 
 			}
 			.addOnFailureListener {
-				Toast.makeText(this, "Failed on getting current location",
-					Toast.LENGTH_SHORT).show()
+				Toast.makeText(
+					this, "Failed on getting current location",
+					Toast.LENGTH_SHORT
+				).show()
 			}
 	}
 
-	inner class weatherTask(_mainActivity : MainActivity) : AsyncTask<String, Void, String>() {
+	inner class weatherTask(_mainActivity: MainActivity) : AsyncTask<String, Void, String>() {
 
 		private val mainActivity = _mainActivity
 		override fun doInBackground(vararg params: String?): String? {
-			var response:String?
-			try{
-				response = URL("https://api.openweathermap.org/data/2.5/weather?lat=$latitude&lon=$longitude&appid=$API").readText(
-					Charsets.UTF_8
-				)
-			}catch (e: Exception){
+			var response: String?
+			try {
+				response =
+					URL("https://api.openweathermap.org/data/2.5/weather?lat=$latitude&lon=$longitude&appid=$API").readText(
+						Charsets.UTF_8
+					)
+			} catch (e: Exception) {
 				response = null
 			}
 			return response
@@ -133,23 +125,25 @@ class MainActivity : AppCompatActivity()
 				val wind = jsonObj.getJSONObject("wind")
 				val weather = jsonObj.getJSONArray("weather").getJSONObject(0)
 
-				val updatedAt:Long = jsonObj.getLong("dt")
-				val updatedAtText = "Updated at: "+ SimpleDateFormat("dd/MM/yyyy hh:mm a", Locale.ENGLISH).format(
-					Date(updatedAt*1000)
-				)
-				val temp = main.getString("temp")+"°C"
-				val tempMin = "Min Temp: " + main.getString("temp_min")+"°C"
-				val tempMax = "Max Temp: " + main.getString("temp_max")+"°C"
+				val updatedAt: Long = jsonObj.getLong("dt")
+				val updatedAtText =
+					"Updated at: " + SimpleDateFormat("dd/MM/yyyy hh:mm a", Locale.ENGLISH).format(
+						Date(updatedAt * 1000)
+					)
+				val temp = main.getString("temp") + "°C"
+				val tempMin = "Min Temp: " + main.getString("temp_min") + "°C"
+				val tempMax = "Max Temp: " + main.getString("temp_max") + "°C"
 				val pressure = main.getString("pressure")
 				val humidity = main.getString("humidity")
 
-				val sunrise:Long = sys.getLong("sunrise")
-				val sunset:Long = sys.getLong("sunset")
+				val sunrise: Long = sys.getLong("sunrise")
+				val sunset: Long = sys.getLong("sunset")
 				val windSpeed = wind.getString("speed")
 				val weatherDescription = weather.getString("description")
 				val weatherID = weather.getString("main")
 
-				findViewById<TextView>(R.id.textView_weater_main).text = "Weather description ${weatherID}"
+				findViewById<TextView>(R.id.textView_weater_main).text =
+					"Weather description ${weatherID}"
 
 				/* TO CHECK :
 				- Thunderstorm
@@ -171,15 +165,15 @@ class MainActivity : AppCompatActivity()
 				*/
 
 				when (weatherID) {
-					"Fog" 	-> Glide.with(mainActivity).load(R.raw.fog).into(findViewById<ImageView>(R.id.imageviewGIF));
-					"Rain" 	-> Glide.with(mainActivity).load(R.raw.rain).into(findViewById<ImageView>(R.id.imageviewGIF));
-					"Snow" 	-> Glide.with(mainActivity).load(R.raw.snow).into(findViewById<ImageView>(R.id.imageviewGIF));
+					"Fog" -> bgVideoView.setVideoPath(resPath + R.raw.fog)
+					"Rain" -> bgVideoView.setVideoPath(resPath + R.raw.rain)
+					"Snow" -> bgVideoView.setVideoPath(resPath + R.raw.snow_day)
 					else -> { // Note the block
-						Glide.with(mainActivity).load(R.raw.snow).into(findViewById<ImageView>(R.id.imageviewGIF));
+						bgVideoView.setVideoPath(resPath + R.raw.day)
 					}
 				}
 
-				val address = jsonObj.getString("name")+", "+sys.getString("country")
+				val address = jsonObj.getString("name") + ", " + sys.getString("country")
 
 			} catch (e: Exception) {
 				println("Error !!")
@@ -187,7 +181,11 @@ class MainActivity : AppCompatActivity()
 
 		}
 
+	}
+
 	override fun onResume() {
 		super.onResume()
 		bgVideoView.start()
 	}
+
+}
