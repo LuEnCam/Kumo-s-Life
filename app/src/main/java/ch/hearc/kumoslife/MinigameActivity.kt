@@ -1,5 +1,6 @@
 package ch.hearc.kumoslife
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.hardware.Sensor
@@ -16,7 +17,8 @@ class MinigameActivity : AppCompatActivity(), SensorEventListener
 	private var sensorManager : SensorManager? = null
 	private var gravitySensor : Sensor? = null
 
-
+	// the game requires the user to tilt the device, the screen must stay the same orientation
+	@SuppressLint("SourceLockedOrientationActivity")
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
 		super.onCreate(savedInstanceState)
