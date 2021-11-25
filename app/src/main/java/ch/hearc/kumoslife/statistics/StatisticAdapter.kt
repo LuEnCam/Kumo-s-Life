@@ -7,6 +7,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import ch.hearc.kumoslife.R
+import ch.hearc.kumoslife.database.Statistic
 import kotlin.collections.ArrayList
 import kotlin.math.roundToInt
 
@@ -40,7 +41,7 @@ class StatisticAdapter() : RecyclerView.Adapter<StatisticAdapter.ViewHolder>()
 		return dataList.size
 	}
 
-	fun setData(dataList: ArrayList<Statistic>)
+	fun setData()
 	{
 		this.dataList = dataList
 		dataList.sortBy { element -> element.name }
