@@ -3,6 +3,7 @@ package ch.hearc.kumoslife.shop
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import ch.hearc.kumoslife.R
@@ -17,6 +18,7 @@ class ItemAdapter() : RecyclerView.Adapter<ItemAdapter.ViewHolder>()
 		val name: TextView = itemView.findViewById(R.id.nameItem)
 		val prize: TextView = itemView.findViewById(R.id.prizeItem)
 		val infos: TextView = itemView.findViewById(R.id.infosItem)
+		val image: ImageView = itemView.findViewById(R.id.itemImageView)
 	}
 
 	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder
@@ -32,7 +34,8 @@ class ItemAdapter() : RecyclerView.Adapter<ItemAdapter.ViewHolder>()
 		val data = dataList[position]
 		holder.name.text = data.name
 		holder.prize.text = data.prize.toString()
-		holder.infos.text = data.infos
+		holder.infos.text = data.info()
+		holder.image.setImageResource(data.id)
 	}
 
 	override fun getItemCount(): Int
