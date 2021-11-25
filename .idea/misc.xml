@@ -3,6 +3,9 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/Luca/Documents/GitHub/Kumo-s-Life/app/src/main/res/drawable/rain_gif.xml" value="0.346875" />
+        <entry key="..\:/Users/Luca/Documents/GitHub/Kumo-s-Life/app/src/main/res/layout/activity_main.xml" value="0.30078740157480316" />
+        <entry key="..\:/Users/Luca/Documents/GitHub/Kumo-s-Life/app/src/main/res/layout/fragment_kumo.xml" value="0.12817028985507245" />
         <entry key="..\:/dev/Android/KumosLife/app/src/main/res/layout/activity_main.xml" value="0.2" />
         <entry key="..\:/dev/Mobile/Kumo-s-Life/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.2703125" />
         <entry key="..\:/dev/Mobile/Kumo-s-Life/app/src/main/res/drawable/greenprogress.xml" value="0.2046875" />

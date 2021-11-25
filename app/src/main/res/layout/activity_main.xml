@@ -6,37 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-<!--    <ImageView-->
-<!--        android:id="@+id/backgroundImageView"-->
-<!--        android:layout_width="0dp"-->
-<!--        android:layout_height="0dp"-->
-<!--        android:scaleType="centerCrop"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="parent"-->
-<!--        tools:srcCompat="@tools:sample/backgrounds/scenic" />-->
-
-<!--    <ImageView-->
-<!--        android:id="@+id/kumoImageView"-->
-<!--        android:layout_width="260dp"-->
-<!--        android:layout_height="260dp"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="parent"-->
-<!--        tools:srcCompat="@tools:sample/avatars" />-->
-
-<!--    <ImageView-->
-<!--        android:id="@+id/eyesImageView"-->
-<!--        android:layout_width="0dp"-->
-<!--        android:layout_height="0dp"-->
-<!--        app:layout_constraintBottom_toBottomOf="@+id/kumoImageView"-->
-<!--        app:layout_constraintEnd_toEndOf="@+id/kumoImageView"-->
-<!--        app:layout_constraintStart_toStartOf="@+id/kumoImageView"-->
-<!--        app:layout_constraintTop_toTopOf="@+id/kumoImageView"-->
-<!--        app:srcCompat="@drawable/ic_launcher_foreground" />-->
-
     <VideoView
         android:id="@+id/mainBgVideo"
         android:layout_width="fill_parent"
