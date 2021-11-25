@@ -17,6 +17,7 @@ import android.os.SystemClock
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.getSystemService
@@ -33,6 +34,8 @@ class MinigameActivity : AppCompatActivity(), SensorEventListener
 
 	private val showHitBoxes = true
 
+	private var score = 0
+
 	// the game requires the user to tilt the device, the screen must stay the same orientation
 	@SuppressLint("SourceLockedOrientationActivity")
 	override fun onCreate(savedInstanceState: Bundle?)
@@ -47,8 +50,9 @@ class MinigameActivity : AppCompatActivity(), SensorEventListener
 		setContentView(R.layout.activity_minigame)
 
 		// debug
-		if (showHitBoxes)
+		if (showHitBoxes) {
 			findViewById<View>(R.id.kumo_fragment_container).setBackgroundColor(Color.MAGENTA)
+		}
 	}
 
 	private fun addEnemy(enemy: MinigameEnemy)
@@ -66,19 +70,43 @@ class MinigameActivity : AppCompatActivity(), SensorEventListener
 		val kumoRect = Rect(kumoContainer.left, kumoContainer.top, kumoContainer.right, kumoContainer.bottom)
 
 
+
 		val toRemoveEnemies = mutableListOf<MinigameEnemy>()
+		val minigameLayout = findViewById<ConstraintLayout>(R.id.minigame_constraint)
+
+		// collide with player
 		for (enemy in enemies)
 		{
 			enemy.y += enemy.speed * deltaTime;
-			if (kumoRect.intersect(enemy.getRect()))
+			if (enemy.getRect().intersect(kumoRect))
 			{
-				findViewById<ConstraintLayout>(R.id.minigame_constraint).removeView(enemy.view)
+				score += 100
+
 				toRemoveEnemies.add(enemy)
 			}
 		}
 
-		for (toRemoveEnemy in toRemoveEnemies)
+		// collide with the whole screen and remove enemies that are no longer visible
+		val minigameRect = Rect(minigameLayout.left, minigameLayout.top, minigameLayout.right, minigameLayout.bottom)
+		for (enemy in enemies)
+		{
+			// if the enemy is not visible anymore
+			if (!enemy.getRect().intersect(minigameRect))
+			{
+				score -= 10
+				println("enemy:  " + enemy.getRect())
+				println("screen: " + minigameRect)
+
+				// to avoid removing it twice
+				if (!toRemoveEnemies.contains(enemy))
+					toRemoveEnemies.add(enemy)
+			}
+		}
+
+		for (toRemoveEnemy in toRemoveEnemies) {
+			minigameLayout.removeView(toRemoveEnemy.view)
 			enemies.remove(toRemoveEnemy)
+		}
 	}
 
 	private var lastGeneratedEnemyTime: Long = SystemClock.elapsedRealtime()
@@ -95,6 +123,12 @@ class MinigameActivity : AppCompatActivity(), SensorEventListener
 			val x = Random.nextFloat() * maxWidth
 			addEnemy(MinigameEnemy(x, 0f, this))
 		}
+	}
+
+	private fun updateScore()
+	{
+		val scoreView = findViewById<TextView>(R.id.minigame_score_textview)
+		scoreView.text = "Score: " + score
 	}
 
 	override fun onResume()
@@ -130,6 +164,7 @@ class MinigameActivity : AppCompatActivity(), SensorEventListener
 		}
 		updateEnemies(deltaTime / 1000f)
 		generateEnemies()
+		updateScore()
 	}
 
 	override fun onAccuracyChanged(sensor: Sensor?, p1: Int) {}
