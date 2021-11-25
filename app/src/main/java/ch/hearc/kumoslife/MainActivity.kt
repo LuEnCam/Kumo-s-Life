@@ -1,10 +1,13 @@
 package ch.hearc.kumoslife
 
+import androidx.lifecycle.Observer
+import android.content.Intent
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.AsyncTask
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
@@ -17,6 +20,13 @@ import java.net.URL
 import android.content.Intent
 import ch.hearc.kumoslife.statistics.StatisticsActivity
 import android.widget.VideoView
+import androidx.lifecycle.ViewModelProvider
+import ch.hearc.kumoslife.database.AppDatabase
+import ch.hearc.kumoslife.database.Statistic
+import ch.hearc.kumoslife.database.StatisticDao
+import ch.hearc.kumoslife.model.StatisticViewModel
+import java.util.*
+import java.util.concurrent.Executors
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.time.ExperimentalTime
@@ -29,6 +39,7 @@ class MainActivity : AppCompatActivity() {
 	var actualTime: LocalDateTime = LocalDateTime.MIN
 	private val resPath: String = "android.resource://ch.hearc.kumoslife/"
 	private lateinit var bgVideoView: VideoView
+	private lateinit var viewModel: StatisticViewModel
 
 	var place = ""
 	val API = "9d783bddf8b3eaa718e7d926a18ccb1c"	//API key used : allows 60 calls per minute
@@ -57,18 +68,48 @@ class MainActivity : AppCompatActivity() {
 		}
 		//bgVideoView.start()
 
-		// Statistics
+		// To statistics
 		findViewById<Button>(R.id.mainToStatisticsButton).setOnClickListener() {
 			intent = Intent(this, StatisticsActivity::class.java)
 			startActivity(intent)
 		}
 
-		// Luca.C - 28.10.2021 : initialize fused location client
+		// Data base initialisation
+		val db = AppDatabase.getInstance(applicationContext)
+		viewModel = ViewModelProvider(this).get(StatisticViewModel::class.java)
+		viewModel.setDatabase(db)
+
+		// Data base insertion
+		viewModel.insertStatistic(Statistic(0, "Hunger", 0.0, 0.3))
+		viewModel.insertStatistic(Statistic(0, "Hunger", 0.0, 0.3))
+		viewModel.insertStatistic(Statistic(0, "Thirst", 0.0, 1.0))
+		viewModel.insertStatistic(Statistic(0, "Activity", 0.0, 2.0))
+		viewModel.insertStatistic(Statistic(0, "Sleep", 0.0, 0.1))
+		viewModel.insertStatistic(Statistic(0, "Sickness", 80.0, 1.0))
+
+		viewModel.getAllStatistics().observe(this, Observer {
+				statistics -> Log.i("testtttttt", "statistics=$statistics")
+		})
+
+		// Data base update
+		val timer = Timer()
+		timer.schedule(StatisticsTask(viewModel), 10, 60000)
+    
+    // Luca.C - 28.10.2021 : initialize fused location client
 		fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
 		//Directly fetch localisation at app startup
 		getCurrentLocation()
 	}
+
+	// FIXME can't be an inner class ?
+	class StatisticsTask(private val viewModel: StatisticViewModel) : TimerTask()
+	{
+		override fun run()
+		{
+			viewModel.progressAllStatistics()
+    }
+  }
 
 	@ExperimentalTime
 	private fun getCurrentLocation() {
@@ -211,7 +252,8 @@ class MainActivity : AppCompatActivity() {
 		}
 	}
 
-	override fun onResume() {
+	override fun onResume()
+	{
 		super.onResume()
 		bgVideoView.start()
 	}
