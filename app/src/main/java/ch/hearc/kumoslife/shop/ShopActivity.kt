@@ -7,21 +7,17 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import ch.hearc.kumoslife.R
 
-class ShopActivity : AppCompatActivity()
-{
+class ShopActivity : AppCompatActivity() {
 	lateinit var adapter: ItemAdapter
 
-	override fun onCreate(savedInstanceState: Bundle?)
-	{
+	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 
 		setContentView(R.layout.activity_shop)
 
 		val list: ArrayList<Item> = ArrayList()
-		list.add(Food("Frites", 10.0, 5.0, R.drawable.ic_launcher_foreground))
-		list.add(Food("Soupe", 5.00,5.0, R.drawable.ic_launcher_background))
-		list.add(Food("Glace", 15.0, 5.0, R.drawable.ic_launcher_foreground))
-		list.add(Food("Chocolat", 20.0, 5.0, R.drawable.ic_launcher_foreground))
+		list.add(Food("Frites", 10.0, 5.0, getImageRId("frites")))
+		list.add(Food("Glace", 15.0, 5.0, getImageRId("glace")))
 
 		adapter = ItemAdapter()
 		adapter.setData(list)
@@ -34,5 +30,9 @@ class ShopActivity : AppCompatActivity()
 		findViewById<Button>(R.id.returnToMainButton).setOnClickListener() {
 			finish()
 		}
+	}
+
+	private fun getImageRId(s: String): Int {
+		return resources.getIdentifier(s, "drawable", packageName)
 	}
 }
