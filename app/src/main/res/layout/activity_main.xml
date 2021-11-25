@@ -20,26 +20,6 @@
         android:name="ch.hearc.kumoslife.KumoFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-    
-    <Button
-        android:id="@+id/btGetLocation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:text="Get Current Location"
-        android:textColor="@android:color/white"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="30dp" />
-
-    <TextView
-        android:id="@+id/textView_weater_main"
-        android:layout_width="0dp"
-        android:layout_height="27dp"
-        android:layout_marginTop="5dp"
-        android:text="TextView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btGetLocation" />
 
     <Button
         android:id="@+id/mainToStatisticsButton"
