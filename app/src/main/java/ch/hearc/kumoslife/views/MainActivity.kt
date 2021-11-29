@@ -3,6 +3,7 @@ package ch.hearc.kumoslife.views
 import android.content.Intent
 import android.Manifest
 import android.content.pm.PackageManager
+import android.location.Location
 import android.os.AsyncTask
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -27,6 +28,8 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.time.ExperimentalTime
 import ch.hearc.kumoslife.views.shop.ShopActivity
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationResult
 
 class MainActivity : AppCompatActivity()
 {
@@ -126,11 +129,44 @@ class MainActivity : AppCompatActivity()
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQ_CODE)
             return
         }
+
         fusedLocationClient.lastLocation.addOnSuccessListener { location -> // getting the last known or current location
-            latitude = location.latitude
-            longitude = location.longitude
-            actualTime = LocalDateTime.now()
-            weatherTask(this).execute()
+            var  newLocation : Location? = null
+            if (location == null || location.accuracy > 100)
+            {
+                var mLocationCallback = object : LocationCallback()
+                {
+                    override fun onLocationResult(locationResult: LocationResult?)
+                    {
+                        if (locationResult != null && locationResult.locations.isNotEmpty()) {
+                            newLocation = locationResult.locations[0]
+                        }
+                        else
+                        {
+                            Toast.makeText(null, "Failed on getting current location", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
+            if (location !== null)
+            {
+                latitude = location.latitude
+                longitude = location.longitude
+                actualTime = LocalDateTime.now()
+                weatherTask(this).execute()
+            }
+            else if (newLocation !== null)
+            {
+                latitude = newLocation!!.latitude
+                longitude = newLocation!!.longitude
+                actualTime = LocalDateTime.now()
+                weatherTask(this).execute()
+            }
+            else
+            {
+                Toast.makeText(this, "Failed on getting current location. Please try again later", Toast.LENGTH_SHORT).show()
+            }
+
         }.addOnFailureListener { Toast.makeText(this, "Failed on getting current location", Toast.LENGTH_SHORT).show() }
     }
 
@@ -239,7 +275,6 @@ class MainActivity : AppCompatActivity()
 
                 bgVideoView.start()
 
-                //val address = jsonObj.getString("name") + ", " + sys.getString("country")
             }
             catch (e: Exception)
             {
