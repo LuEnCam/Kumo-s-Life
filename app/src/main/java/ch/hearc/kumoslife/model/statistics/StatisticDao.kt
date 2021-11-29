@@ -1,7 +1,8 @@
-package ch.hearc.kumoslife.model
+package ch.hearc.kumoslife.model.statistics
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
+import ch.hearc.kumoslife.model.statistics.Statistic
 
 @Dao
 interface StatisticDao

@@ -7,8 +7,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import ch.hearc.kumoslife.model.AppDatabase
-import ch.hearc.kumoslife.model.Statistic
-import ch.hearc.kumoslife.model.StatisticDao
+import ch.hearc.kumoslife.model.statistics.Statistic
+import ch.hearc.kumoslife.model.statistics.StatisticDao
 import java.util.concurrent.Executors
 
 class StatisticViewModel : ViewModel()

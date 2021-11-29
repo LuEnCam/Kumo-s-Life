@@ -7,7 +7,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import ch.hearc.kumoslife.R
-import ch.hearc.kumoslife.model.Statistic
+import ch.hearc.kumoslife.model.statistics.Statistic
 import kotlin.collections.ArrayList
 import kotlin.math.roundToInt
 

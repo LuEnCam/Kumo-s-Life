@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import ch.hearc.kumoslife.model.statistics.Statistic
+import ch.hearc.kumoslife.model.statistics.StatisticDao
 
 @Database(entities = [Statistic::class], version = 1)
 abstract class AppDatabase : RoomDatabase()

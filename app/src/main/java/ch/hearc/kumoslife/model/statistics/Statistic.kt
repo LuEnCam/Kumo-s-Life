@@ -1,4 +1,4 @@
-package ch.hearc.kumoslife.model
+package ch.hearc.kumoslife.model.statistics
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

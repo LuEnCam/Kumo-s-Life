@@ -1,4 +1,4 @@
-package ch.hearc.kumoslife
+package ch.hearc.kumoslife.views
 
 import android.content.Intent
 import android.Manifest
@@ -6,7 +6,6 @@ import android.content.pm.PackageManager
 import android.os.AsyncTask
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
@@ -18,16 +17,16 @@ import org.json.JSONObject
 import java.net.URL
 import ch.hearc.kumoslife.views.statistics.StatisticsActivity
 import android.widget.VideoView
-import androidx.lifecycle.ViewModelProvider
+import ch.hearc.kumoslife.R
+import ch.hearc.kumoslife.SpriteView
 import ch.hearc.kumoslife.model.AppDatabase
-import ch.hearc.kumoslife.model.Statistic
+import ch.hearc.kumoslife.model.statistics.Statistic
 import ch.hearc.kumoslife.modelview.StatisticViewModel
 import java.util.*
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.time.ExperimentalTime
-import androidx.lifecycle.Observer
-import ch.hearc.kumoslife.shop.ShopActivity
+import ch.hearc.kumoslife.views.shop.ShopActivity
 
 class MainActivity : AppCompatActivity()
 {
