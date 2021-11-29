@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity() {
 
 
 		// Adding the drawables (images + gifs) to the ImageViews with Glade
-		Glide.with(this).load(R.raw.eye).into(eyesImageView)
+		Glide.with(this).load(R.drawable.eye).into(eyesImageView)
 		Glide.with(this).load(R.drawable.mouth_happy_white).into(mouthImageView)
 
 		// Background video
