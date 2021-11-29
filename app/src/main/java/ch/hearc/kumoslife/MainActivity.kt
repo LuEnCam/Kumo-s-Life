@@ -27,6 +27,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.time.ExperimentalTime
 import androidx.lifecycle.Observer
+import ch.hearc.kumoslife.shop.ShopActivity
 
 class MainActivity : AppCompatActivity()
 {
@@ -69,6 +70,12 @@ class MainActivity : AppCompatActivity()
         // To statistics
         findViewById<Button>(R.id.mainToStatisticsButton).setOnClickListener() {
             intent = Intent(this, StatisticsActivity::class.java)
+            startActivity(intent)
+        }
+
+        // To shop
+        findViewById<Button>(R.id.mainToShopButton).setOnClickListener() {
+            intent = Intent(this, ShopActivity::class.java)
             startActivity(intent)
         }
 
