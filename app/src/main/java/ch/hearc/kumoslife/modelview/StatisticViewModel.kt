@@ -1,11 +1,14 @@
-package ch.hearc.kumoslife.model
+package ch.hearc.kumoslife.modelview
 
+import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import ch.hearc.kumoslife.database.AppDatabase
-import ch.hearc.kumoslife.database.Statistic
-import ch.hearc.kumoslife.database.StatisticDao
+import androidx.lifecycle.ViewModelProvider
+import ch.hearc.kumoslife.model.AppDatabase
+import ch.hearc.kumoslife.model.Statistic
+import ch.hearc.kumoslife.model.StatisticDao
 import java.util.concurrent.Executors
 
 class StatisticViewModel : ViewModel()
@@ -14,6 +17,21 @@ class StatisticViewModel : ViewModel()
     private lateinit var db: AppDatabase
     private lateinit var statisticDao: StatisticDao
 
+    // Static instance: singleton
+    companion object
+    {
+        private var instance: StatisticViewModel? = null;
+
+        fun getInstance(activity: AppCompatActivity): StatisticViewModel
+        {
+            if (instance == null)
+            {
+                instance = ViewModelProvider(activity).get(StatisticViewModel::class.java)
+            }
+            return instance as StatisticViewModel
+        }
+    }
+
     fun setDatabase(db: AppDatabase)
     {
         this.db = db
@@ -21,7 +39,7 @@ class StatisticViewModel : ViewModel()
         statisticsLiveData.value = ArrayList()
     }
 
-    fun getAllStatistics() : LiveData<ArrayList<Statistic>>
+    fun getAllStatistics(): LiveData<ArrayList<Statistic>>
     {
         return statisticsLiveData
     }
@@ -33,8 +51,8 @@ class StatisticViewModel : ViewModel()
             statisticDao.insert(stat)
         }
 
-        // Insertion in live data
         statisticsLiveData.value?.add(stat)
+        statisticsLiveData.postValue(statisticsLiveData.value)
     }
 
     fun updateStatistic(stat: Statistic)
@@ -45,33 +63,52 @@ class StatisticViewModel : ViewModel()
         }
 
         // Update in live data
-        val statistics: MutableList<Statistic>? = statisticsLiveData.value?.toMutableList()
+        val statistics: ArrayList<Statistic>? = statisticsLiveData.value
         if (statistics != null)
+        {
             for (i in 0 until statistics.size)
+            {
                 if (statistics[i].id == stat.id)
+                {
                     statistics[i] = stat
+                    Log.i("update", "updated")
+                }
+            }
+        }
+
+        statisticsLiveData.postValue(statistics)
     }
 
     fun progressAllStatistics()
     {
-        val statistics: List<Statistic>? = statisticsLiveData.value
+        val statistics: ArrayList<Statistic>? = statisticsLiveData.value
 
         if (statistics != null)
+        {
             for (stat in statistics)
             {
                 stat.value += stat.progress
                 if (stat.value > 100)
+                {
                     stat.value = 100.0
+                }
 
-                updateStatistic(stat)
+                Executors.newSingleThreadExecutor().execute {
+                    statisticDao.update(stat)
+                }
             }
+        }
+
+        statisticsLiveData.postValue(statistics)
     }
 
     fun decrease(decreaseValue: Double, stat: Statistic)
     {
         stat.value -= decreaseValue
         if (stat.value < 0)
+        {
             stat.value = 0.0
+        }
 
         updateStatistic(stat)
     }
