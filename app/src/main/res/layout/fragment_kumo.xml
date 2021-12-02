@@ -22,8 +22,6 @@
         app:rows="3"
         app:src="@raw/spritekumo" />
 
-    s
-
     <ImageView
         android:id="@+id/eyes_imageView"
         android:layout_width="260dp"
@@ -40,7 +38,7 @@
         app:layout_constraintEnd_toEndOf="@+id/kumo_spriteView"
         app:layout_constraintStart_toStartOf="@+id/kumo_spriteView"
         app:layout_constraintTop_toTopOf="@+id/kumo_spriteView"
-        android:layout_width="262dp"
+        android:layout_width="260dp"
         android:layout_height="260dp"
         tools:srcCompat="@drawable/mouth_happy_white" />
 
