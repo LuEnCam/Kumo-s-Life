@@ -11,8 +11,8 @@
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/kumo_fragment_container"
         android:name="ch.hearc.kumoslife.KumoFragment"
-        android:layout_width="128dp"
-        android:layout_height="128dp"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
         android:layout_marginBottom="16dp"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"

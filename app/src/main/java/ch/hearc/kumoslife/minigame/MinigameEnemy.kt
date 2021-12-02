@@ -5,6 +5,7 @@ import android.graphics.Rect
 import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import ch.hearc.kumoslife.R
+import kotlin.random.Random
 
 class MinigameEnemy(x: Float,y: Float, context: Activity) {
     val speed = 300f // units of distance per second
@@ -17,8 +18,8 @@ class MinigameEnemy(x: Float,y: Float, context: Activity) {
         set(value) { view.y = value; field = value }
 
     companion object {
-        val width = 256
-        val height = 256
+        val width = 96
+        val height = 96
     }
 
     init {
@@ -27,7 +28,19 @@ class MinigameEnemy(x: Float,y: Float, context: Activity) {
         this.y = y
         view.id = ImageView.generateViewId()
 
-        view.setImageResource(R.drawable.ic_launcher_foreground)
+        // fruits from https://www.deviantart.com/anarchisedlute/art/Pixel-Art-32x32-Fruits-Free-Download-784786733
+        // free to use for private use
+        val fruits = arrayOf(
+            R.drawable.ananas,
+            R.drawable.apple,
+            R.drawable.cherries,
+            R.drawable.kiwi,
+            R.drawable.orange,
+            R.drawable.peach,
+            R.drawable.watermelon
+        )
+
+        view.setImageResource(fruits[Random.nextInt(fruits.size)])
     }
 
     fun getRect(): Rect
