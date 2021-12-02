@@ -51,13 +51,13 @@ class StatisticViewModel : ViewModel()
     fun initDataBase()
     {
         Executors.newSingleThreadExecutor().execute {
-            Log.i("DELETE", "Everything has been deleted")
+            Log.i("DELETE", "Everything has been deleted and reinserted")
             db.statisticDao().deleteAll()
-            db.statisticDao().insert(Statistic(0, "Hunger", 0.0, 0.3))
-            db.statisticDao().insert(Statistic(0, "Thirst", 0.0, 1.0))
-            db.statisticDao().insert(Statistic(0, "Activity", 0.0, 2.0))
-            db.statisticDao().insert(Statistic(0, "Sleep", 0.0, 0.1))
-            db.statisticDao().insert(Statistic(0, "Sickness", 80.0, 1.0))
+            db.statisticDao().insert(Statistic(0, "Hunger", 35.0, 8.0))
+            db.statisticDao().insert(Statistic(0, "Thirst", 65.0, 6.9))
+            db.statisticDao().insert(Statistic(0, "Activity", 10.0, 12.5))
+            db.statisticDao().insert(Statistic(0, "Sleep", 15.0, 2.3))
+            db.statisticDao().insert(Statistic(0, "Sickness", 26.0, 1.0))
         }
     }
 
@@ -66,7 +66,7 @@ class StatisticViewModel : ViewModel()
         return statisticsLiveData
     }
 
-    fun updateStatistic(stat: Statistic)
+    private fun updateStatistic(stat: Statistic)
     {
         // Update in data base
         Executors.newSingleThreadExecutor().execute {
@@ -82,7 +82,6 @@ class StatisticViewModel : ViewModel()
                 if (statistics[i].id == stat.id)
                 {
                     statistics[i] = stat
-                    Log.i("update", "updated")
                 }
             }
         }
