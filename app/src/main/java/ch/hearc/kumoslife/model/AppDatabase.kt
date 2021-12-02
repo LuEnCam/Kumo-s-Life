@@ -24,6 +24,12 @@ abstract class AppDatabase : RoomDatabase()
             }
             return instance as AppDatabase
         }
+
+        // WARNING: has to be initialized before calling this method
+        fun getInstance(): AppDatabase
+        {
+            return instance!!
+        }
     }
 
     abstract fun statisticDao(): StatisticDao

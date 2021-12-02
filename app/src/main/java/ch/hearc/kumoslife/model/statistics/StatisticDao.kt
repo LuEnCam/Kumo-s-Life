@@ -2,7 +2,6 @@ package ch.hearc.kumoslife.model.statistics
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
-import ch.hearc.kumoslife.model.statistics.Statistic
 
 @Dao
 interface StatisticDao
@@ -13,9 +12,9 @@ interface StatisticDao
     @Update
     fun update(stat: Statistic)
 
-    @Query("SELECT * FROM statistic ORDER BY name")
-    fun getAll(): LiveData<List<Statistic>>
+    @Query("SELECT * FROM statistic")
+    fun getAll(): List<Statistic>
 
-    @Query("SELECT * FROM statistic WHERE id = :id")
-    fun getById(id: Int): LiveData<Statistic>
+    @Query("DELETE FROM statistic")
+    fun deleteAll()
 }

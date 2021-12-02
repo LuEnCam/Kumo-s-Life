@@ -7,6 +7,7 @@ import android.location.Location
 import android.os.AsyncTask
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
@@ -18,6 +19,8 @@ import org.json.JSONObject
 import java.net.URL
 import ch.hearc.kumoslife.views.statistics.StatisticsActivity
 import android.widget.VideoView
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import ch.hearc.kumoslife.R
 import ch.hearc.kumoslife.SpriteView
 import ch.hearc.kumoslife.model.AppDatabase
@@ -28,8 +31,11 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.time.ExperimentalTime
 import ch.hearc.kumoslife.views.shop.ShopActivity
+import ch.hearc.kumoslife.views.statistics.StatisticsWorker
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity()
 {
@@ -42,6 +48,8 @@ class MainActivity : AppCompatActivity()
     var actualTime: LocalDateTime = LocalDateTime.MIN
     var place = ""
     val API = "9d783bddf8b3eaa718e7d926a18ccb1c"    //API key used : allows 60 calls per minute
+    private val workManager = WorkManager.getInstance(application)
+
 
     private lateinit var bgVideoView: VideoView
     private lateinit var viewModel: StatisticViewModel
@@ -81,21 +89,16 @@ class MainActivity : AppCompatActivity()
             startActivity(intent)
         }
 
-        // Data base initialisation
+        // Data base initialization
         val db = AppDatabase.getInstance(applicationContext)
         viewModel = StatisticViewModel.getInstance(this)
-        viewModel.setDatabase(db)
 
-        // Data base insertion
-        viewModel.insertStatistic(Statistic(0, "Hunger", 0.0, 0.3))
-        viewModel.insertStatistic(Statistic(0, "Thirst", 0.0, 1.0))
-        viewModel.insertStatistic(Statistic(0, "Activity", 0.0, 2.0))
-        viewModel.insertStatistic(Statistic(0, "Sleep", 0.0, 0.1))
-        viewModel.insertStatistic(Statistic(0, "Sickness", 80.0, 1.0))
+        // Data base insertion of fresh new rows
+        // viewModel.initDataBase()
 
         // Data base update
-        val timer = Timer()
-        timer.schedule(StatisticsTask(viewModel), 10, 600)
+        val statisticsWorker = PeriodicWorkRequestBuilder<StatisticsWorker>(15, TimeUnit.MINUTES).build()
+        workManager.enqueue(statisticsWorker)
 
         // Luca.C - 28.10.2021 : initialize fused location client
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -110,15 +113,6 @@ class MainActivity : AppCompatActivity()
         bgVideoView.start()
     }
 
-    // FIXME can't be an inner class ?
-    class StatisticsTask(private val viewModel: StatisticViewModel) : TimerTask()
-    {
-        override fun run()
-        {
-            viewModel.progressAllStatistics()
-        }
-    }
-
     @ExperimentalTime
     private fun getCurrentLocation()
     {
@@ -131,14 +125,15 @@ class MainActivity : AppCompatActivity()
         }
 
         fusedLocationClient.lastLocation.addOnSuccessListener { location -> // getting the last known or current location
-            var  newLocation : Location? = null
+            var newLocation: Location? = null
             if (location == null || location.accuracy > 100)
             {
                 var mLocationCallback = object : LocationCallback()
                 {
                     override fun onLocationResult(locationResult: LocationResult?)
                     {
-                        if (locationResult != null && locationResult.locations.isNotEmpty()) {
+                        if (locationResult != null && locationResult.locations.isNotEmpty())
+                        {
                             newLocation = locationResult.locations[0]
                         }
                         else
