@@ -14,13 +14,15 @@ import android.hardware.SensorManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.SystemClock
+import android.util.Log
 import android.view.View
+import android.view.Window
 import android.view.WindowManager
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import ch.hearc.kumoslife.minigame.MinigameEnemy
+import ch.hearc.kumoslife.minigame.MinigameFruit
 import kotlin.random.Random
 
 class MinigameActivity : AppCompatActivity(), SensorEventListener
@@ -33,7 +35,7 @@ class MinigameActivity : AppCompatActivity(), SensorEventListener
 	private var sensorManager : SensorManager? = null
 	private var gravitySensor : Sensor? = null
 
-	private val enemies : MutableList<MinigameEnemy> = mutableListOf()
+	private val fruits : MutableList<MinigameFruit> = mutableListOf()
 	private var score = 0
 	private var difficulty = 0f
 	private var collected = 0
@@ -54,68 +56,81 @@ class MinigameActivity : AppCompatActivity(), SensorEventListener
 		requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 		window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
+		requestWindowFeature(Window.FEATURE_NO_TITLE)
+		supportActionBar?.hide()
+
 		setContentView(R.layout.activity_minigame)
 
 		// debug
 		if (showHitBoxes) {
 			findViewById<View>(R.id.kumo_fragment_container).setBackgroundColor(Color.MAGENTA)
 		}
+
+		Log.i("Minigame", "Minigame instance created")
 	}
 
 	override fun onStop() {
 		super.onStop()
 		window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+		Log.i("Minigame", "Minigame instance stopped")
 	}
 
-	private fun addEnemy(enemy: MinigameEnemy)
+	private fun addFruit(fruit: MinigameFruit)
 	{
 		if (showHitBoxes)
-			enemy.view.setBackgroundColor(Color.GREEN)
+			fruit.view.setBackgroundColor(Color.GREEN)
 
-		findViewById<ConstraintLayout>(R.id.minigame_constraint).addView(enemy.view)
-		enemies.add(enemy)
+		findViewById<ConstraintLayout>(R.id.minigame_constraint).addView(fruit.view)
+		fruits.add(fruit)
+
+		Log.i("Minigame", "New fruit spawned")
 	}
 
-	private fun updateEnemies(deltaTime: Float)
+	private fun updateFruits(deltaTime: Float)
 	{
 		val kumoContainer = findViewById<View>(R.id.kumo_fragment_container)
 		val kumoRect = Rect(kumoContainer.left, kumoContainer.top, kumoContainer.right, kumoContainer.bottom)
 
-		val toRemoveEnemies = mutableListOf<MinigameEnemy>()
+		val toRemoveFruits = mutableListOf<MinigameFruit>()
 		val minigameLayout = findViewById<ConstraintLayout>(R.id.minigame_constraint)
 
 		// collide with player
-		for (enemy in enemies)
+		for (fruit in fruits)
 		{
-			enemy.y += (enemy.speed + difficulty * 10f) * deltaTime;
-			if (enemy.getRect().intersect(kumoRect))
+			fruit.y += (fruit.speed + difficulty * 10f) * deltaTime;
+			if (fruit.getRect().intersect(kumoRect))
 			{
 				score += 100
 				difficulty += 1f
 				collected += 1
-				toRemoveEnemies.add(enemy)
+				toRemoveFruits.add(fruit)
+
+				Log.i("Minigame", "Fruit caught")
 			}
 		}
 
-		// collide with the whole screen and remove enemies that are no longer visible
+		// collide with the whole screen and remove fruits that are no longer visible
 		val minigameRect = Rect(minigameLayout.left, minigameLayout.top, minigameLayout.right, minigameLayout.bottom)
-		for (enemy in enemies)
+		for (fruit in fruits)
 		{
-			// if the enemy is not visible anymore
-			if (!enemy.getRect().intersect(minigameRect))
+			// if the fruit is not visible anymore
+			if (!fruit.getRect().intersect(minigameRect))
 			{
 				score -= 10
 				lives -= 1
 
 				// to avoid removing it twice
-				if (!toRemoveEnemies.contains(enemy))
-					toRemoveEnemies.add(enemy)
+				if (!toRemoveFruits.contains(fruit))
+					toRemoveFruits.add(fruit)
+
+
+				Log.i("Minigame", "A fruit exited the screen")
 			}
 		}
 
-		for (toRemoveEnemy in toRemoveEnemies) {
-			minigameLayout.removeView(toRemoveEnemy.view)
-			enemies.remove(toRemoveEnemy)
+		for (toRemoveFruit in toRemoveFruits) {
+			minigameLayout.removeView(toRemoveFruit.view)
+			fruits.remove(toRemoveFruit)
 		}
 
 		if (lives == 0)
@@ -124,6 +139,8 @@ class MinigameActivity : AppCompatActivity(), SensorEventListener
 
 			val collectedFood = collected / 10
 
+			Log.i("Minigame", "The game has been lost and $collectedFood units of food have been gathered")
+
 			// once we lost open a dialog to alert the user and then return the amount of fruits
 			// collected to the calling activity
 			AlertDialog.Builder(this)
@@ -131,6 +148,8 @@ class MinigameActivity : AppCompatActivity(), SensorEventListener
 				.setMessage("You managed to collect $collectedFood unit(s) of food")
 				.setPositiveButton("Press F") {
 						_,_ ->
+					Log.i("Minigame", "User pressed F")
+
 					val result = Intent()
 					result.putExtra(MINIGAME_COLLECTED_ID, collectedFood) // we collect 1 food for every 10 caught in game
 					setResult(Activity.RESULT_OK, result)
@@ -140,28 +159,31 @@ class MinigameActivity : AppCompatActivity(), SensorEventListener
 		}
 	}
 
-	private var lastGeneratedEnemyTime: Long = SystemClock.elapsedRealtime()
-	private fun generateEnemies()
+	private var lastGeneratedFruitTime: Long = SystemClock.elapsedRealtime()
+	private fun generateFruits()
 	{
-		val deltaTime = (SystemClock.elapsedRealtime() - lastGeneratedEnemyTime) / 1000f
+		val deltaTime = (SystemClock.elapsedRealtime() - lastGeneratedFruitTime) / 1000f
 
-		val multiplier: Float = (1.0 / Math.log10(difficulty + 10.0)).toFloat()
+		val multiplier: Float = (1.0 / Math.log10(difficulty * 1.5 + 10.0)).toFloat()
 
 		if (deltaTime >= 1f * multiplier) {
-			lastGeneratedEnemyTime = SystemClock.elapsedRealtime()
+			lastGeneratedFruitTime = SystemClock.elapsedRealtime()
 
 			val width = findViewById<View>(R.id.minigame_constraint).width
-			val maxWidth = width - MinigameEnemy.width
+			val maxWidth = width - MinigameFruit.width
 
 			val x = Random.nextFloat() * maxWidth
-			addEnemy(MinigameEnemy(x, 200f, this))
+			addFruit(MinigameFruit(x, 200f, this))
 		}
 	}
 
 	private fun updateHUD()
 	{
 		val scoreView = findViewById<TextView>(R.id.minigame_score_textview)
-		scoreView.text = "score: $score | lives: $lives"
+		scoreView.text = "score : $score"
+
+		val lifeView = findViewById<TextView>(R.id.minigame_life_textview)
+		lifeView.text ="${lives} : lives"
 	}
 
 	override fun onResume()
@@ -171,6 +193,7 @@ class MinigameActivity : AppCompatActivity(), SensorEventListener
 		// set the delay to game so we get a high refresh rate and we can also use the
 		// sensor changed method to update the game state
 		sensorManager?.registerListener(this, gravitySensor, SensorManager.SENSOR_DELAY_GAME)
+		Log.i("Minigame", "Game has been resumed")
 	}
 
 	private var lastElapsedTime: Long = SystemClock.elapsedRealtime()
@@ -205,12 +228,14 @@ class MinigameActivity : AppCompatActivity(), SensorEventListener
 
 		if (!paused)
 		{
-			updateEnemies(deltaTime / 1000f)
-			generateEnemies()
+			updateFruits(deltaTime / 1000f)
+			generateFruits()
 			updateHUD()
 		}
 	}
 
-	override fun onAccuracyChanged(sensor: Sensor?, p1: Int) {}
+	override fun onAccuracyChanged(sensor: Sensor?, p1: Int) {
+		Log.i("Minigame", "Sensor accuracy changed.");
+	}
 
 }

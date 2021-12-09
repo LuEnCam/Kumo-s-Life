@@ -2,12 +2,13 @@ package ch.hearc.kumoslife.minigame
 
 import android.app.Activity
 import android.graphics.Rect
+import android.util.Log
 import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import ch.hearc.kumoslife.R
 import kotlin.random.Random
 
-class MinigameEnemy(x: Float,y: Float, context: Activity) {
+class MinigameFruit(x: Float, y: Float, context: Activity) {
     val speed = 300f // units of distance per second
 
     val view : ImageView = ImageView(context)
@@ -18,8 +19,8 @@ class MinigameEnemy(x: Float,y: Float, context: Activity) {
         set(value) { view.y = value; field = value }
 
     companion object {
-        val width = 96
-        val height = 96
+        const val width = 96
+        const val height = 96
     }
 
     init {
@@ -28,21 +29,23 @@ class MinigameEnemy(x: Float,y: Float, context: Activity) {
         this.y = y
         view.id = ImageView.generateViewId()
 
-        // fruits from https://www.deviantart.com/anarchisedlute/art/Pixel-Art-32x32-Fruits-Free-Download-784786733
-        // free to use for private use
+        Log.i("MinigameFruit", "New fruit view with id: ${view.id}")
+        
         val fruits = arrayOf(
-            R.drawable.ananas,
-            R.drawable.apple,
-            R.drawable.cherries,
-            R.drawable.kiwi,
-            R.drawable.orange,
-            R.drawable.peach,
-            R.drawable.watermelon
+            R.drawable.flat_apple,
+            R.drawable.flat_apricot,
+            R.drawable.flat_banana,
+            R.drawable.flat_cherry,
+            R.drawable.flat_grape,
+            R.drawable.flat_pear,
+            R.drawable.flat_pinapple,
+            R.drawable.flat_strawberry
         )
 
         view.setImageResource(fruits[Random.nextInt(fruits.size)])
     }
 
+    // get rekt
     fun getRect(): Rect
     {
         return Rect(
