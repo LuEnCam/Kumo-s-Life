@@ -114,15 +114,19 @@ class MainActivity : AppCompatActivity()
 
         shopViewModel = ShopViewModel.getInstance(this)
         shopViewModel.setDatabase(db)
-        //shopViewModel.deleteAllFood()
-        //shopViewModel.insertFood(Food(0, "glace", 2.0, 3.0, R.drawable.glace))
+        shopViewModel.resetFood();
+
     }
+
+
 
     override fun onResume()
     {
         super.onResume()
         bgVideoView.start()
     }
+
+
 
     // FIXME can't be an inner class ?
     class StatisticsTask(private val viewModel: StatisticViewModel) : TimerTask()

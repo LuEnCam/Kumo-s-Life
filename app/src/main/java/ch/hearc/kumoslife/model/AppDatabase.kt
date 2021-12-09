@@ -10,7 +10,7 @@ import ch.hearc.kumoslife.model.shop.ShopDao
 import ch.hearc.kumoslife.model.statistics.Statistic
 import ch.hearc.kumoslife.model.statistics.StatisticDao
 
-@Database(entities = [Statistic::class, Food::class], version = 2)
+@Database(entities = [Statistic::class, Food::class], version = 4)
 abstract class AppDatabase : RoomDatabase()
 {
     // Static instance: singleton
