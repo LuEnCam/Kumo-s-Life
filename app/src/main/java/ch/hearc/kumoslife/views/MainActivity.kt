@@ -1,4 +1,5 @@
 package ch.hearc.kumoslife.views
+
 import android.content.Intent
 import android.Manifest
 import android.content.pm.PackageManager
@@ -14,14 +15,12 @@ import android.view.View
 import android.view.Window
 import android.widget.*
 import androidx.core.app.ActivityCompat
-import androidx.work.ExistingPeriodicWorkPolicy
 import com.bumptech.glide.Glide
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import org.json.JSONObject
 import java.net.URL
 import ch.hearc.kumoslife.views.statistics.StatisticsActivity
-import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import ch.hearc.kumoslife.R
 import ch.hearc.kumoslife.SpriteView
@@ -33,33 +32,32 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.time.ExperimentalTime
 import ch.hearc.kumoslife.views.shop.ShopActivity
-import ch.hearc.kumoslife.views.statistics.StatisticsWorker
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
 import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 import android.widget.Toast
+import java.util.concurrent.ExecutorService
 
 class MainActivity : AppCompatActivity()
 {
     private val resPath: String = "android.resource://ch.hearc.kumoslife/"
-
+    private val TAG: String = MainActivity::class.java.name
     private val LOCATION_PERMISSION_REQ_CODE = 1000
+    val API = "9d783bddf8b3eaa718e7d926a18ccb1c"    //API key used : allows 60 calls per minute
+
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     var latitude: Double = 0.0
     var longitude: Double = 0.0
     var actualTime: LocalDateTime = LocalDateTime.MIN
-    var place = ""
-    val API = "9d783bddf8b3eaa718e7d926a18ccb1c"    //API key used : allows 60 calls per minute
 
     //Use of Executor and handler to replace AsyncTasks
-    val myExecutor = Executors.newSingleThreadExecutor()
-    val myHandler = Handler(Looper.getMainLooper())
+    private val weatherExecutor: ExecutorService = Executors.newSingleThreadExecutor()
+    private val weatherHandler = Handler(Looper.getMainLooper())
 
     private lateinit var bgVideoView: VideoView
     private lateinit var viewModel: StatisticViewModel
     private val buttonList: LinkedList<Button> = LinkedList<Button>()
-    private val workManager = WorkManager.getInstance(application)
+    private val workManager = WorkManager.getInstance(application) // unused every time but needed to instantiate
     private var isLightOn = true
 
     @ExperimentalTime
@@ -81,13 +79,13 @@ class MainActivity : AppCompatActivity()
         Glide.with(this).load(R.raw.eye).into(eyesImageView)
         Glide.with(this).load(R.drawable.mouth_happy_white).into(mouthImageView)
 
-        // Background video
+        // Background video initialization
         bgVideoView = findViewById(R.id.mainBgVideo)
         bgVideoView.setVideoPath(resPath + R.raw.day)
         bgVideoView.setOnPreparedListener { mp ->
             mp.isLooping = true
             mp.setVolume(0.0F, 0.0F)    // no need of volume
-        } // bgVideoView.start()
+        }
 
         // To statistics
         val toStatisticsButton: Button = findViewById(R.id.mainToStatisticsButton)
@@ -147,6 +145,7 @@ class MainActivity : AppCompatActivity()
                 val stat: Statistic? = viewModel.getStatisticByName("Sleep")
                 if (stat != null && !isLightOn)
                 {
+                    Log.i(TAG, "Decrease sleep value")
                     viewModel.decrease(1.0, stat)
                 }
             }
@@ -162,12 +161,12 @@ class MainActivity : AppCompatActivity()
         {
             override fun run()
             {
+                Log.i(TAG, "Launching weather & location task")
                 getCurrentLocation()
-                Log.i("Timer","Launching location & weatherTask")
             }
         }
-        val WeatherTimer = Timer()
-        WeatherTimer.scheduleAtFixedRate(weatherTimerTask,0,1000*60*1)
+        val weatherTimer = Timer()
+        weatherTimer.scheduleAtFixedRate(weatherTimerTask, 0, 1000 * 60 * 1)
 
     }
 
@@ -192,7 +191,7 @@ class MainActivity : AppCompatActivity()
             var newLocation: Location? = null
             if (location == null || location.accuracy > 100)
             {
-                var mLocationCallback = object : LocationCallback()
+                object : LocationCallback()
                 {
                     override fun onLocationResult(locationResult: LocationResult?)
                     {
@@ -207,6 +206,7 @@ class MainActivity : AppCompatActivity()
                     }
                 }
             }
+
             if (location !== null)
             {
                 latitude = location.latitude
@@ -220,7 +220,6 @@ class MainActivity : AppCompatActivity()
                 longitude = newLocation!!.longitude
                 actualTime = LocalDateTime.now()
                 launchExecutor()
-
             }
             else
             {
@@ -232,30 +231,29 @@ class MainActivity : AppCompatActivity()
 
     private fun launchExecutor()
     {
-        myExecutor.execute {
+        weatherExecutor.execute {
             val response = weatherTaskExecution()
-            myHandler.post {
+            weatherHandler.post {
                 checkWeatherResponse(response)
             }
         }
     }
 
-    private fun weatherTaskExecution() : String?
+    private fun weatherTaskExecution(): String?
     {
-        var response: String?
-        try
+        val response = try
         {
-            response = URL("https://api.openweathermap.org/data/2.5/weather?lat=$latitude&lon=$longitude&appid=$API").readText(Charsets.UTF_8)
+            URL("https://api.openweathermap.org/data/2.5/weather?lat=$latitude&lon=$longitude&appid=$API").readText(Charsets.UTF_8)
         }
         catch (e: Exception)
         {
-            response = null
+            null
         }
 
         return response
     }
 
-    private fun checkWeatherResponse(result : String?)
+    private fun checkWeatherResponse(result: String?)
     {
         try
         {
@@ -310,8 +308,7 @@ class MainActivity : AppCompatActivity()
             val formatter = DateTimeFormatter.ofPattern("HH")
             val formatted = actualTime.format(formatter)
 
-            var isDay = if (formatted.toInt() in 7..17) true else false // We determine the day time between 7h and 16h
-
+            val isDay = formatted.toInt() in 7..17 // We determine the day time between 7h and 16h
 
             //Depending on the API results, we will use the correct video
             when (weatherID)
@@ -341,7 +338,7 @@ class MainActivity : AppCompatActivity()
         }
         catch (e: Exception)
         {
-            println("Error !!")
+            Log.e(TAG, "Error: $e")
         }
     }
 }

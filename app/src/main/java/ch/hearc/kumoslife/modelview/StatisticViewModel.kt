@@ -14,6 +14,7 @@ import java.util.concurrent.Executors
 
 class StatisticViewModel : ViewModel()
 {
+    private val TAG: String = StatisticViewModel::class.java.name
     private val statisticsLiveData = MutableLiveData<ArrayList<Statistic>>()
     private val db: AppDatabase = AppDatabase.getInstance()
     private val statisticDao: StatisticDao = db.statisticDao()
@@ -51,7 +52,7 @@ class StatisticViewModel : ViewModel()
     fun initDataBase()
     {
         Executors.newSingleThreadExecutor().execute {
-            Log.i("DELETE", "Everything has been deleted and reinserted")
+            Log.i(TAG, "All statistics has been deleted and reinserted in data base")
             statisticDao.deleteAll()
             statisticDao.insert(Statistic(0, "Hunger", 35.0, 8.0))
             statisticDao.insert(Statistic(0, "Thirst", 65.0, 6.9))
