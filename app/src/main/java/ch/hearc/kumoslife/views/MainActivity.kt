@@ -7,17 +7,22 @@ import android.location.Location
 import android.os.AsyncTask
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.Toast
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
+import android.view.View
+import android.view.Window
+import android.widget.*
 import androidx.core.app.ActivityCompat
+import androidx.work.ExistingPeriodicWorkPolicy
 import com.bumptech.glide.Glide
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import org.json.JSONObject
 import java.net.URL
 import ch.hearc.kumoslife.views.statistics.StatisticsActivity
-import android.widget.VideoView
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import ch.hearc.kumoslife.R
 import ch.hearc.kumoslife.SpriteView
 import ch.hearc.kumoslife.model.AppDatabase
@@ -28,8 +33,13 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.time.ExperimentalTime
 import ch.hearc.kumoslife.views.shop.ShopActivity
+import ch.hearc.kumoslife.views.statistics.StatisticsWorker
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import android.widget.Toast
+
 
 class MainActivity : AppCompatActivity()
 {
@@ -45,11 +55,18 @@ class MainActivity : AppCompatActivity()
 
     private lateinit var bgVideoView: VideoView
     private lateinit var viewModel: StatisticViewModel
+    private val buttonList: LinkedList<Button> = LinkedList<Button>()
+    private val workManager = WorkManager.getInstance(application)
+    private var isLightOn = true
 
     @ExperimentalTime
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
+        // Remove title bar
+        requestWindowFeature(Window.FEATURE_NO_TITLE)
+        supportActionBar?.hide()
+
         setContentView(R.layout.activity_main)
 
         //
@@ -70,32 +87,69 @@ class MainActivity : AppCompatActivity()
         } // bgVideoView.start()
 
         // To statistics
-        findViewById<Button>(R.id.mainToStatisticsButton).setOnClickListener() {
+        val toStatisticsButton: Button = findViewById(R.id.mainToStatisticsButton)
+        toStatisticsButton.setOnClickListener() {
             intent = Intent(this, StatisticsActivity::class.java)
             startActivity(intent)
         }
+        buttonList.add(toStatisticsButton)
 
         // To shop
-        findViewById<Button>(R.id.mainToShopButton).setOnClickListener() {
+        val toShopButton: Button = findViewById(R.id.mainToShopButton)
+        toShopButton.setOnClickListener() {
             intent = Intent(this, ShopActivity::class.java)
             startActivity(intent)
         }
+        buttonList.add(toShopButton)
 
-        // Data base initialisation
+        // Turn off/on light
+        findViewById<Button>(R.id.mainLightButton).setOnClickListener() {
+            isLightOn = !isLightOn
+
+            val lightBg: TextView = findViewById(R.id.mainLightBg)
+            if (isLightOn)
+            {
+                for (button in buttonList)
+                {
+                    button.isEnabled = true
+                }
+                lightBg.visibility = View.INVISIBLE
+            }
+            else
+            {
+                for (button in buttonList)
+                {
+                    button.isEnabled = false
+                }
+                lightBg.visibility = View.VISIBLE
+            }
+        }
+
+        // Data base initialization
         val db = AppDatabase.getInstance(applicationContext)
         viewModel = StatisticViewModel.getInstance(this)
-        viewModel.setDatabase(db)
 
-        // Data base insertion
-        viewModel.insertStatistic(Statistic(0, "Hunger", 0.0, 0.3))
-        viewModel.insertStatistic(Statistic(0, "Thirst", 0.0, 1.0))
-        viewModel.insertStatistic(Statistic(0, "Activity", 0.0, 2.0))
-        viewModel.insertStatistic(Statistic(0, "Sleep", 0.0, 0.1))
-        viewModel.insertStatistic(Statistic(0, "Sickness", 80.0, 1.0))
+        // Data base insertion of fresh new rows
+        // viewModel.initDataBase()
 
-        // Data base update
+        // Data base update every 15 mins
+        // val statisticsWorker = PeriodicWorkRequestBuilder<StatisticsWorker>(15, TimeUnit.MINUTES).build()
+        // workManager.enqueueUniquePeriodicWork("statisticsWorker", ExistingPeriodicWorkPolicy.KEEP, statisticsWorker)
+
+        // Update light value
+        val lightTimerTask: TimerTask = object : TimerTask()
+        {
+            override fun run()
+            {
+                val stat: Statistic? = viewModel.getStatisticByName("Sleep")
+                if (stat != null && !isLightOn)
+                {
+                    viewModel.decrease(1.0, stat)
+                }
+            }
+        }
         val timer = Timer()
-        timer.schedule(StatisticsTask(viewModel), 10, 600)
+        timer.scheduleAtFixedRate(lightTimerTask, 0, 10000)
 
         // Luca.C - 28.10.2021 : initialize fused location client
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -110,15 +164,6 @@ class MainActivity : AppCompatActivity()
         bgVideoView.start()
     }
 
-    // FIXME can't be an inner class ?
-    class StatisticsTask(private val viewModel: StatisticViewModel) : TimerTask()
-    {
-        override fun run()
-        {
-            viewModel.progressAllStatistics()
-        }
-    }
-
     @ExperimentalTime
     private fun getCurrentLocation()
     {
@@ -131,14 +176,15 @@ class MainActivity : AppCompatActivity()
         }
 
         fusedLocationClient.lastLocation.addOnSuccessListener { location -> // getting the last known or current location
-            var  newLocation : Location? = null
+            var newLocation: Location? = null
             if (location == null || location.accuracy > 100)
             {
                 var mLocationCallback = object : LocationCallback()
                 {
                     override fun onLocationResult(locationResult: LocationResult?)
                     {
-                        if (locationResult != null && locationResult.locations.isNotEmpty()) {
+                        if (locationResult != null && locationResult.locations.isNotEmpty())
+                        {
                             newLocation = locationResult.locations[0]
                         }
                         else

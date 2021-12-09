@@ -28,10 +28,12 @@ class StatisticsActivity : AppCompatActivity()
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
 
+        // Initialise
+        //adapter.setData(viewModel.get)
+
         // Observer on data base
         viewModel = StatisticViewModel.getInstance(this)
         viewModel.getAllStatistics().observe(this, Observer { statistics ->
-            Log.i("something", "updated=$statistics")
             adapter.setData(statistics)
             adapter.notifyDataSetChanged()
         })
