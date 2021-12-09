@@ -114,8 +114,13 @@ class MainActivity : AppCompatActivity()
 
         shopViewModel = ShopViewModel.getInstance(this)
         shopViewModel.setDatabase(db)
-        //shopViewModel.deleteAllFood()
-        //shopViewModel.insertFood(Food(0, "glace", 2.0, 3.0, R.drawable.glace))
+        shopViewModel.resetFood(this::getImageRId);
+
+    }
+
+    fun getImageRId(s: String): Int
+    {
+        return resources.getIdentifier(s, "drawable", packageName)
     }
 
     override fun onResume()

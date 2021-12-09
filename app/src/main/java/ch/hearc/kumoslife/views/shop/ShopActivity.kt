@@ -43,9 +43,4 @@ class ShopActivity : AppCompatActivity()
     {
         adapter.setData(list)
     }
-
-    private fun getImageRId(s: String): Int
-    {
-        return resources.getIdentifier(s, "drawable", packageName)
-    }
 }

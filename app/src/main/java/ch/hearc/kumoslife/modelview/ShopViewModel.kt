@@ -54,6 +54,16 @@ class ShopViewModel: ViewModel()
         }
     }
 
+    // Provisional, must be chek if database is already filled
+    fun resetFood(getImageRId: (String) -> Int)
+    {
+        Executors.newSingleThreadExecutor().execute {
+            shopDao.deleteAll()
+            shopDao.insert(Food(0, "glace", 2.0, 3.0, getImageRId("glace")))
+            shopDao.insert(Food(0, "frites", 2.0, 3.0, getImageRId("frites")))
+        }
+    }
+
     fun insertFood(food: Food)
     {
         // Insertion in data base
