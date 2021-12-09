@@ -12,7 +12,7 @@ import kotlin.collections.ArrayList
 
 class ItemAdapter() : RecyclerView.Adapter<ItemAdapter.ViewHolder>()
 {
-    private var dataList: ArrayList<Item> = ArrayList()
+    private var dataList: List<Item> = ArrayList()
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
     {
@@ -36,7 +36,7 @@ class ItemAdapter() : RecyclerView.Adapter<ItemAdapter.ViewHolder>()
         holder.name.text = data.name
         holder.prize.text = data.prize.toString()
         holder.infos.text = data.info()
-        holder.image.setImageResource(data.id)
+        holder.image.setImageResource(data.imageId)
     }
 
     override fun getItemCount(): Int
@@ -44,9 +44,8 @@ class ItemAdapter() : RecyclerView.Adapter<ItemAdapter.ViewHolder>()
         return dataList.size
     }
 
-    fun setData(dataList: ArrayList<Item>)
+    fun setData(dataList: List<Item>)
     {
         this.dataList = dataList
-        dataList.sortBy { element -> element.prize }
     }
 }

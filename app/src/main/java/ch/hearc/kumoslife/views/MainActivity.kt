@@ -21,7 +21,9 @@ import android.widget.VideoView
 import ch.hearc.kumoslife.R
 import ch.hearc.kumoslife.SpriteView
 import ch.hearc.kumoslife.model.AppDatabase
+import ch.hearc.kumoslife.model.shop.Food
 import ch.hearc.kumoslife.model.statistics.Statistic
+import ch.hearc.kumoslife.modelview.ShopViewModel
 import ch.hearc.kumoslife.modelview.StatisticViewModel
 import java.util.*
 import java.time.LocalDateTime
@@ -44,7 +46,8 @@ class MainActivity : AppCompatActivity()
     val API = "9d783bddf8b3eaa718e7d926a18ccb1c"    //API key used : allows 60 calls per minute
 
     private lateinit var bgVideoView: VideoView
-    private lateinit var viewModel: StatisticViewModel
+    private lateinit var statisticViewModel: StatisticViewModel
+    private lateinit var shopViewModel: ShopViewModel
 
     @ExperimentalTime
     override fun onCreate(savedInstanceState: Bundle?)
@@ -83,25 +86,36 @@ class MainActivity : AppCompatActivity()
 
         // Data base initialisation
         val db = AppDatabase.getInstance(applicationContext)
-        viewModel = StatisticViewModel.getInstance(this)
-        viewModel.setDatabase(db)
+        statisticViewModel = StatisticViewModel.getInstance(this)
+        statisticViewModel.setDatabase(db)
 
         // Data base insertion
-        viewModel.insertStatistic(Statistic(0, "Hunger", 0.0, 0.3))
-        viewModel.insertStatistic(Statistic(0, "Thirst", 0.0, 1.0))
-        viewModel.insertStatistic(Statistic(0, "Activity", 0.0, 2.0))
-        viewModel.insertStatistic(Statistic(0, "Sleep", 0.0, 0.1))
-        viewModel.insertStatistic(Statistic(0, "Sickness", 80.0, 1.0))
+        statisticViewModel.insertStatistic(Statistic(0, "Hunger", 0.0, 0.3))
+        statisticViewModel.insertStatistic(Statistic(0, "Thirst", 0.0, 1.0))
+        statisticViewModel.insertStatistic(Statistic(0, "Activity", 0.0, 2.0))
+        statisticViewModel.insertStatistic(Statistic(0, "Sleep", 0.0, 0.1))
+        statisticViewModel.insertStatistic(Statistic(0, "Sickness", 80.0, 1.0))
 
         // Data base update
         val timer = Timer()
-        timer.schedule(StatisticsTask(viewModel), 10, 600)
+        timer.schedule(StatisticsTask(statisticViewModel), 10, 600)
 
         // Luca.C - 28.10.2021 : initialize fused location client
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         //Directly fetch localisation at app startup
         getCurrentLocation()
+
+        shopDatabase(db)
+    }
+
+    private fun shopDatabase(db: AppDatabase)
+    {
+
+        shopViewModel = ShopViewModel.getInstance(this)
+        shopViewModel.setDatabase(db)
+        //shopViewModel.deleteAllFood()
+        //shopViewModel.insertFood(Food(0, "glace", 2.0, 3.0, R.drawable.glace))
     }
 
     override fun onResume()
