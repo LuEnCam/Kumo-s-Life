@@ -15,6 +15,9 @@ interface StatisticDao
     @Query("SELECT * FROM statistic")
     fun getAll(): List<Statistic>
 
+    @Query("SELECT * FROM statistic WHERE name = :name")
+    fun getStatisticByName(name: String): Statistic
+
     @Query("DELETE FROM statistic")
     fun deleteAll()
 }

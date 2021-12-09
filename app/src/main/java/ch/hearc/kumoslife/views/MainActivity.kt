@@ -7,18 +7,20 @@ import android.location.Location
 import android.os.AsyncTask
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.Toast
+import android.view.View
+import android.view.Window
+import android.widget.*
 import androidx.core.app.ActivityCompat
+import androidx.work.ExistingPeriodicWorkPolicy
 import com.bumptech.glide.Glide
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import org.json.JSONObject
 import java.net.URL
 import ch.hearc.kumoslife.views.statistics.StatisticsActivity
-import android.widget.VideoView
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import ch.hearc.kumoslife.R
@@ -36,6 +38,8 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import android.widget.Toast
+
 
 class MainActivity : AppCompatActivity()
 {
@@ -48,16 +52,21 @@ class MainActivity : AppCompatActivity()
     var actualTime: LocalDateTime = LocalDateTime.MIN
     var place = ""
     val API = "9d783bddf8b3eaa718e7d926a18ccb1c"    //API key used : allows 60 calls per minute
-    private val workManager = WorkManager.getInstance(application)
-
 
     private lateinit var bgVideoView: VideoView
     private lateinit var viewModel: StatisticViewModel
+    private val buttonList: LinkedList<Button> = LinkedList<Button>()
+    private val workManager = WorkManager.getInstance(application)
+    private var isLightOn = true
 
     @ExperimentalTime
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
+        // Remove title bar
+        requestWindowFeature(Window.FEATURE_NO_TITLE)
+        supportActionBar?.hide()
+
         setContentView(R.layout.activity_main)
 
         //
@@ -78,15 +87,42 @@ class MainActivity : AppCompatActivity()
         } // bgVideoView.start()
 
         // To statistics
-        findViewById<Button>(R.id.mainToStatisticsButton).setOnClickListener() {
+        val toStatisticsButton: Button = findViewById(R.id.mainToStatisticsButton)
+        toStatisticsButton.setOnClickListener() {
             intent = Intent(this, StatisticsActivity::class.java)
             startActivity(intent)
         }
+        buttonList.add(toStatisticsButton)
 
         // To shop
-        findViewById<Button>(R.id.mainToShopButton).setOnClickListener() {
+        val toShopButton: Button = findViewById(R.id.mainToShopButton)
+        toShopButton.setOnClickListener() {
             intent = Intent(this, ShopActivity::class.java)
             startActivity(intent)
+        }
+        buttonList.add(toShopButton)
+
+        // Turn off/on light
+        findViewById<Button>(R.id.mainLightButton).setOnClickListener() {
+            isLightOn = !isLightOn
+
+            val lightBg: TextView = findViewById(R.id.mainLightBg)
+            if (isLightOn)
+            {
+                for (button in buttonList)
+                {
+                    button.isEnabled = true
+                }
+                lightBg.visibility = View.INVISIBLE
+            }
+            else
+            {
+                for (button in buttonList)
+                {
+                    button.isEnabled = false
+                }
+                lightBg.visibility = View.VISIBLE
+            }
         }
 
         // Data base initialization
@@ -96,9 +132,24 @@ class MainActivity : AppCompatActivity()
         // Data base insertion of fresh new rows
         // viewModel.initDataBase()
 
-        // Data base update
-        val statisticsWorker = PeriodicWorkRequestBuilder<StatisticsWorker>(15, TimeUnit.MINUTES).build()
-        workManager.enqueue(statisticsWorker)
+        // Data base update every 15 mins
+        // val statisticsWorker = PeriodicWorkRequestBuilder<StatisticsWorker>(15, TimeUnit.MINUTES).build()
+        // workManager.enqueueUniquePeriodicWork("statisticsWorker", ExistingPeriodicWorkPolicy.KEEP, statisticsWorker)
+
+        // Update light value
+        val lightTimerTask: TimerTask = object : TimerTask()
+        {
+            override fun run()
+            {
+                val stat: Statistic? = viewModel.getStatisticByName("Sleep")
+                if (stat != null && !isLightOn)
+                {
+                    viewModel.decrease(1.0, stat)
+                }
+            }
+        }
+        val timer = Timer()
+        timer.scheduleAtFixedRate(lightTimerTask, 0, 10000)
 
         // Luca.C - 28.10.2021 : initialize fused location client
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
