@@ -4,6 +4,6 @@ class Food(name: String?, prize: Double, val nutritiveValue: Double, imageId: In
 {
     override fun info(): String
     {
-        return "Nutritive Value: $nutritiveValue"
+        return "$nutritiveValue"
     }
 }
