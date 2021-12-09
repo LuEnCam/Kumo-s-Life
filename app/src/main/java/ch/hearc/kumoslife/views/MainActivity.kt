@@ -1,19 +1,15 @@
 package ch.hearc.kumoslife.views
-
 import android.content.Intent
 import android.Manifest
 import android.content.pm.PackageManager
 import android.location.Location
-import android.os.AsyncTask
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-
 import android.widget.Button
 import android.widget.ImageView
-import android.widget.Toast
 import android.view.View
 import android.view.Window
 import android.widget.*
@@ -162,7 +158,7 @@ class MainActivity : AppCompatActivity()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         //Directly fetch localisation at app startup
-        val lightTimerTask: TimerTask = object : TimerTask()
+        val weatherTimerTask: TimerTask = object : TimerTask()
         {
             override fun run()
             {
@@ -171,7 +167,7 @@ class MainActivity : AppCompatActivity()
             }
         }
         val WeatherTimer = Timer()
-        WeatherTimer.scheduleAtFixedRate(lightTimerTask,0,1000*60*1)
+        WeatherTimer.scheduleAtFixedRate(weatherTimerTask,0,1000*60*1)
 
     }
 
