@@ -64,6 +64,8 @@ class MainActivity : AppCompatActivity()
     private val workManager = WorkManager.getInstance(application) // unused every time but needed to instantiate
     private var isLightOn = true
 
+    private val MINIGAME_REQUEST_CODE = 1
+
     @ExperimentalTime
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -110,7 +112,7 @@ class MainActivity : AppCompatActivity()
         val toMinigameButton = findViewById<Button>(R.id.mainToMinigameButton)
         toMinigameButton.setOnClickListener() {
             intent = Intent(this, MinigameActivity::class.java)
-            startActivity(intent)
+            startActivityForResult(intent, MINIGAME_REQUEST_CODE)
         }
 
         // Turn off/on light
@@ -197,6 +199,21 @@ class MainActivity : AppCompatActivity()
         return resources.getIdentifier(s, "drawable", packageName)
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
+    {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == MINIGAME_REQUEST_CODE)
+        {
+            if (resultCode == RESULT_OK)
+            {
+                if (data != null && data.extras != null)
+                {
+                    val returnedData = data.extras!!.get(MinigameActivity.MINIGAME_COLLECTED_ID)
+                    Toast.makeText(this, "Collected $returnedData unit(s) of FROOTS", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
 
 
     override fun onResume()
