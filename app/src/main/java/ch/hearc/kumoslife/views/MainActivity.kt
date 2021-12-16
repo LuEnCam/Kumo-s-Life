@@ -212,6 +212,7 @@ class MainActivity : AppCompatActivity()
                 latitude = location.latitude
                 longitude = location.longitude
                 actualTime = LocalDateTime.now()
+                Log.i(TAG, "LOCATION NOT NULL")
                 launchExecutor()
             }
             else if (newLocation !== null)
@@ -219,11 +220,13 @@ class MainActivity : AppCompatActivity()
                 latitude = newLocation!!.latitude
                 longitude = newLocation!!.longitude
                 actualTime = LocalDateTime.now()
+                Log.i(TAG, "newLOCATION NOT NULL")
                 launchExecutor()
             }
             else
             {
-                Toast.makeText(this, "Failed on getting current location. Please try again later", Toast.LENGTH_SHORT).show()
+                //Toast.makeText(this, "Failed on getting current location. Please try again later", Toast.LENGTH_SHORT).show()
+                Log.i(TAG, "Failed on getting current location (getCurrentLocation() -> location & newLocation === null )")
             }
 
         }.addOnFailureListener { Toast.makeText(this, "Failed on getting current location", Toast.LENGTH_SHORT).show() }
@@ -285,7 +288,6 @@ class MainActivity : AppCompatActivity()
             val weather = jsonObj.getJSONArray("weather").getJSONObject(0)
             val weatherID = weather.getString("main")
 
-
             /* TO CHECK :
             - Thunderstorm
             - Drizzle
@@ -311,17 +313,23 @@ class MainActivity : AppCompatActivity()
             val isDay = formatted.toInt() in 7..17 // We determine the day time between 7h and 16h
 
             //Depending on the API results, we will use the correct video
+            Log.i(TAG, "weatherID : ${weatherID}")
             when (weatherID)
             {
                 "Fog"  ->
                 {
-                    if (isDay) bgVideoView.setVideoPath(resPath + R.raw.fog)
-                    else bgVideoView.setVideoPath(resPath + R.raw.fog) //TODO : find fog at night video
+                    if (!isDay) bgVideoView.setVideoPath(resPath + R.raw.day_fog)
+                    else bgVideoView.setVideoPath(resPath + R.raw.night_fog)
+                }
+                "Mist"  ->
+                {
+                    if (isDay) bgVideoView.setVideoPath(resPath + R.raw.day_fog)
+                    else bgVideoView.setVideoPath(resPath + R.raw.night_fog)
                 }
                 "Rain" ->
                 {
                     if (isDay) bgVideoView.setVideoPath(resPath + R.raw.rain)
-                    else bgVideoView.setVideoPath(resPath + R.raw.rain) //TODO : find rain at night video
+                    else bgVideoView.setVideoPath(resPath + R.raw.rain_night)
                 }
                 "Snow" ->
                 {
@@ -335,6 +343,7 @@ class MainActivity : AppCompatActivity()
                 }
             }
             bgVideoView.start()
+            Log.i(TAG, "Starting bgVideoView with .start()")
         }
         catch (e: Exception)
         {
