@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.work.WorkManager
 import ch.hearc.kumoslife.model.AppDatabase
 import ch.hearc.kumoslife.model.statistics.Statistic
 import ch.hearc.kumoslife.model.statistics.StatisticDao
@@ -13,9 +14,19 @@ import java.util.concurrent.Executors
 
 class StatisticViewModel : ViewModel()
 {
+    private val TAG: String = StatisticViewModel::class.java.name
     private val statisticsLiveData = MutableLiveData<ArrayList<Statistic>>()
-    private lateinit var db: AppDatabase
-    private lateinit var statisticDao: StatisticDao
+    private val db: AppDatabase = AppDatabase.getInstance()
+    private val statisticDao: StatisticDao = db.statisticDao()
+
+    init
+    {
+        statisticsLiveData.value = ArrayList()
+
+        Executors.newSingleThreadExecutor().execute {
+            statisticsLiveData.postValue(statisticDao.getAll() as ArrayList<Statistic>)
+        }
+    }
 
     // Static instance: singleton
     companion object
@@ -30,13 +41,25 @@ class StatisticViewModel : ViewModel()
             }
             return instance as StatisticViewModel
         }
+
+        // WARNING: has to be initialized before calling this method
+        fun getInstance(): StatisticViewModel
+        {
+            return instance!!
+        }
     }
 
-    fun setDatabase(db: AppDatabase)
+    fun initDataBase()
     {
-        this.db = db
-        statisticDao = db.statisticDao()
-        statisticsLiveData.value = ArrayList()
+        Executors.newSingleThreadExecutor().execute {
+            Log.i(TAG, "All statistics has been deleted and reinserted in data base")
+            statisticDao.deleteAll()
+            statisticDao.insert(Statistic(0, "Hunger", 35.0, 8.0))
+            statisticDao.insert(Statistic(0, "Thirst", 65.0, 6.9))
+            statisticDao.insert(Statistic(0, "Activity", 10.0, 12.5))
+            statisticDao.insert(Statistic(0, "Sleep", 15.0, 2.3))
+            statisticDao.insert(Statistic(0, "Sickness", 26.0, 1.0))
+        }
     }
 
     fun getAllStatistics(): LiveData<ArrayList<Statistic>>
@@ -44,21 +67,28 @@ class StatisticViewModel : ViewModel()
         return statisticsLiveData
     }
 
-    fun insertStatistic(stat: Statistic)
+    fun getStatisticByName(name: String): Statistic?
     {
-        // Insertion in data base
-        Executors.newSingleThreadExecutor().execute {
-            statisticDao.insert(stat)
+        val statistics: ArrayList<Statistic>? = statisticsLiveData.value
+        if (statistics != null)
+        {
+            for (i in 0 until statistics.size)
+            {
+                if (statistics[i].name == name)
+                {
+                    return statistics[i]
+                }
+            }
         }
 
-        statisticsLiveData.value?.add(stat)
-        statisticsLiveData.postValue(statisticsLiveData.value)
+        return null
     }
 
-    fun updateStatistic(stat: Statistic)
+    private fun updateStatistic(stat: Statistic)
     {
         // Update in data base
         Executors.newSingleThreadExecutor().execute {
+            Log.i("Dao", "Update")
             statisticDao.update(stat)
         }
 
@@ -71,7 +101,6 @@ class StatisticViewModel : ViewModel()
                 if (statistics[i].id == stat.id)
                 {
                     statistics[i] = stat
-                    Log.i("update", "updated")
                 }
             }
         }

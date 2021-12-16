@@ -4,12 +4,16 @@ import android.content.Intent
 import android.Manifest
 import android.content.pm.PackageManager
 import android.location.Location
-import android.os.AsyncTask
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
-import android.widget.Toast
+import android.view.View
+import android.view.Window
+import android.widget.*
 import androidx.core.app.ActivityCompat
 import com.bumptech.glide.Glide
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -17,7 +21,7 @@ import com.google.android.gms.location.LocationServices
 import org.json.JSONObject
 import java.net.URL
 import ch.hearc.kumoslife.views.statistics.StatisticsActivity
-import android.widget.VideoView
+import androidx.work.WorkManager
 import ch.hearc.kumoslife.R
 import ch.hearc.kumoslife.SpriteView
 import ch.hearc.kumoslife.model.AppDatabase
@@ -32,27 +36,42 @@ import kotlin.time.ExperimentalTime
 import ch.hearc.kumoslife.views.shop.ShopActivity
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
+import java.util.concurrent.Executors
+import android.widget.Toast
+import ch.hearc.kumoslife.MinigameActivity
+import java.util.concurrent.ExecutorService
 
 class MainActivity : AppCompatActivity()
 {
     private val resPath: String = "android.resource://ch.hearc.kumoslife/"
-
+    private val TAG: String = MainActivity::class.java.name
     private val LOCATION_PERMISSION_REQ_CODE = 1000
+    val API = "9d783bddf8b3eaa718e7d926a18ccb1c"    //API key used : allows 60 calls per minute
+
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     var latitude: Double = 0.0
     var longitude: Double = 0.0
     var actualTime: LocalDateTime = LocalDateTime.MIN
-    var place = ""
-    val API = "9d783bddf8b3eaa718e7d926a18ccb1c"    //API key used : allows 60 calls per minute
+
+    //Use of Executor and handler to replace AsyncTasks
+    private val weatherExecutor: ExecutorService = Executors.newSingleThreadExecutor()
+    private val weatherHandler = Handler(Looper.getMainLooper())
 
     private lateinit var bgVideoView: VideoView
-    private lateinit var statisticViewModel: StatisticViewModel
+    private lateinit var viewModel: StatisticViewModel
     private lateinit var shopViewModel: ShopViewModel
+    private val buttonList: LinkedList<Button> = LinkedList<Button>()
+    private val workManager = WorkManager.getInstance(application) // unused every time but needed to instantiate
+    private var isLightOn = true
 
     @ExperimentalTime
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
+        // Remove title bar
+        requestWindowFeature(Window.FEATURE_NO_TITLE)
+        supportActionBar?.hide()
+
         setContentView(R.layout.activity_main)
 
         //
@@ -61,52 +80,107 @@ class MainActivity : AppCompatActivity()
         val mouthImageView = findViewById<ImageView>(R.id.mouth_imageView)
 
         // Adding the drawables (images + gifs) to the ImageViews with Glade
-        Glide.with(this).load(R.raw.eye).into(eyesImageView)
+        Glide.with(this).load(R.drawable.eye).into(eyesImageView)
         Glide.with(this).load(R.drawable.mouth_happy_white).into(mouthImageView)
 
-        // Background video
+        // Background video initialization
         bgVideoView = findViewById(R.id.mainBgVideo)
         bgVideoView.setVideoPath(resPath + R.raw.day)
         bgVideoView.setOnPreparedListener { mp ->
             mp.isLooping = true
             mp.setVolume(0.0F, 0.0F)    // no need of volume
-        } // bgVideoView.start()
+        }
 
         // To statistics
-        findViewById<Button>(R.id.mainToStatisticsButton).setOnClickListener() {
+        val toStatisticsButton: Button = findViewById(R.id.mainToStatisticsButton)
+        toStatisticsButton.setOnClickListener() {
             intent = Intent(this, StatisticsActivity::class.java)
             startActivity(intent)
         }
+        buttonList.add(toStatisticsButton)
 
         // To shop
-        findViewById<Button>(R.id.mainToShopButton).setOnClickListener() {
+        val toShopButton: Button = findViewById(R.id.mainToShopButton)
+        toShopButton.setOnClickListener() {
             intent = Intent(this, ShopActivity::class.java)
             startActivity(intent)
         }
+        buttonList.add(toShopButton)
 
-        // Data base initialisation
+        val toMinigameButton = findViewById<Button>(R.id.mainToMinigameButton)
+        toMinigameButton.setOnClickListener() {
+            intent = Intent(this, MinigameActivity::class.java)
+            startActivity(intent)
+        }
+
+        // Turn off/on light
+        findViewById<Button>(R.id.mainLightButton).setOnClickListener() {
+            isLightOn = !isLightOn
+
+            val lightBg: TextView = findViewById(R.id.mainLightBg)
+            if (isLightOn)
+            {
+                for (button in buttonList)
+                {
+                    button.isEnabled = true
+                }
+                lightBg.visibility = View.INVISIBLE
+            }
+            else
+            {
+                for (button in buttonList)
+                {
+                    button.isEnabled = false
+                }
+                lightBg.visibility = View.VISIBLE
+            }
+        }
+
+        // Data base initialization
         val db = AppDatabase.getInstance(applicationContext)
-        statisticViewModel = StatisticViewModel.getInstance(this)
-        statisticViewModel.setDatabase(db)
 
-        // Data base insertion
-        statisticViewModel.insertStatistic(Statistic(0, "Hunger", 0.0, 0.3))
-        statisticViewModel.insertStatistic(Statistic(0, "Thirst", 0.0, 1.0))
-        statisticViewModel.insertStatistic(Statistic(0, "Activity", 0.0, 2.0))
-        statisticViewModel.insertStatistic(Statistic(0, "Sleep", 0.0, 0.1))
-        statisticViewModel.insertStatistic(Statistic(0, "Sickness", 80.0, 1.0))
+        viewModel = StatisticViewModel.getInstance(this)
 
-        // Data base update
+        // Data base insertion of fresh new rows
+        // viewModel.initDataBase()
+
+        // Data base update every 15 mins
+        // val statisticsWorker = PeriodicWorkRequestBuilder<StatisticsWorker>(15, TimeUnit.MINUTES).build()
+        // workManager.enqueueUniquePeriodicWork("statisticsWorker", ExistingPeriodicWorkPolicy.KEEP, statisticsWorker)
+
+        // Update light value
+        val lightTimerTask: TimerTask = object : TimerTask()
+        {
+            override fun run()
+            {
+                val stat: Statistic? = viewModel.getStatisticByName("Sleep")
+                if (stat != null && !isLightOn)
+                {
+                    Log.i(TAG, "Decrease sleep value")
+                    viewModel.decrease(1.0, stat)
+                }
+            }
+        }
         val timer = Timer()
-        timer.schedule(StatisticsTask(statisticViewModel), 10, 600)
+        timer.scheduleAtFixedRate(lightTimerTask, 0, 10000)
 
         // Luca.C - 28.10.2021 : initialize fused location client
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         //Directly fetch localisation at app startup
-        getCurrentLocation()
 
         shopDatabase(db)
+        val weatherTimerTask: TimerTask = object : TimerTask()
+        {
+            override fun run()
+            {
+                Log.i(TAG, "Launching weather & location task")
+                getCurrentLocation()
+            }
+        }
+        val weatherTimer = Timer()
+        weatherTimer.scheduleAtFixedRate(weatherTimerTask, 0, 1000 * 60 * 1)
+
     }
 
     private fun shopDatabase(db: AppDatabase)
@@ -132,16 +206,6 @@ class MainActivity : AppCompatActivity()
     }
 
 
-
-    // FIXME can't be an inner class ?
-    class StatisticsTask(private val viewModel: StatisticViewModel) : TimerTask()
-    {
-        override fun run()
-        {
-            viewModel.progressAllStatistics()
-        }
-    }
-
     @ExperimentalTime
     private fun getCurrentLocation()
     {
@@ -154,14 +218,15 @@ class MainActivity : AppCompatActivity()
         }
 
         fusedLocationClient.lastLocation.addOnSuccessListener { location -> // getting the last known or current location
-            var  newLocation : Location? = null
+            var newLocation: Location? = null
             if (location == null || location.accuracy > 100)
             {
-                var mLocationCallback = object : LocationCallback()
+                object : LocationCallback()
                 {
                     override fun onLocationResult(locationResult: LocationResult?)
                     {
-                        if (locationResult != null && locationResult.locations.isNotEmpty()) {
+                        if (locationResult != null && locationResult.locations.isNotEmpty())
+                        {
                             newLocation = locationResult.locations[0]
                         }
                         else
@@ -171,19 +236,20 @@ class MainActivity : AppCompatActivity()
                     }
                 }
             }
+
             if (location !== null)
             {
                 latitude = location.latitude
                 longitude = location.longitude
                 actualTime = LocalDateTime.now()
-                weatherTask(this).execute()
+                launchExecutor()
             }
             else if (newLocation !== null)
             {
                 latitude = newLocation!!.latitude
                 longitude = newLocation!!.longitude
                 actualTime = LocalDateTime.now()
-                weatherTask(this).execute()
+                launchExecutor()
             }
             else
             {
@@ -193,116 +259,116 @@ class MainActivity : AppCompatActivity()
         }.addOnFailureListener { Toast.makeText(this, "Failed on getting current location", Toast.LENGTH_SHORT).show() }
     }
 
-    inner class weatherTask(_mainActivity: MainActivity) : AsyncTask<String, Void, String>()
+    private fun launchExecutor()
     {
-        //private val mainActivity = _mainActivity
+        weatherExecutor.execute {
+            val response = weatherTaskExecution()
+            weatherHandler.post {
+                checkWeatherResponse(response)
+            }
+        }
+    }
 
-        override fun doInBackground(vararg params: String?): String?
+    private fun weatherTaskExecution(): String?
+    {
+        val response = try
         {
-            var response: String?
-            try
-            {
-                response = URL("https://api.openweathermap.org/data/2.5/weather?lat=$latitude&lon=$longitude&appid=$API").readText(Charsets.UTF_8)
-            }
-            catch (e: Exception)
-            {
-                response = null
-            }
-            return response
+            URL("https://api.openweathermap.org/data/2.5/weather?lat=$latitude&lon=$longitude&appid=$API").readText(Charsets.UTF_8)
+        }
+        catch (e: Exception)
+        {
+            null
         }
 
-        override fun onPostExecute(result: String?)
+        return response
+    }
+
+    private fun checkWeatherResponse(result: String?)
+    {
+        try
         {
-            super.onPostExecute(result)
-            try
+            /* Extracting JSON returns from the API */
+            val jsonObj = JSONObject(result)
+
+            /*
+            val main = jsonObj.getJSONObject("main")
+            val sys = jsonObj.getJSONObject("sys")
+            val wind = jsonObj.getJSONObject("wind")
+
+            val updatedAt: Long = jsonObj.getLong("dt")
+            val updatedAtText =
+                "Updated at: " + SimpleDateFormat("dd/MM/yyyy hh:mm a", Locale.ENGLISH).format(
+                    Date(updatedAt * 1000)
+                )
+            val temp = main.getString("temp") + "°C"
+            val tempMin = "Min Temp: " + main.getString("temp_min") + "°C"
+            val tempMax = "Max Temp: " + main.getString("temp_max") + "°C"
+            val pressure = main.getString("pressure")
+            val humidity = main.getString("humidity")
+
+            val sunrise: Long = sys.getLong("sunrise")
+            val sunset: Long = sys.getLong("sunset")
+            val windSpeed = wind.getString("speed")
+            val weatherDescription = weather.getString("description")
+            */
+
+            val weather = jsonObj.getJSONArray("weather").getJSONObject(0)
+            val weatherID = weather.getString("main")
+
+
+            /* TO CHECK :
+            - Thunderstorm
+            - Drizzle
+            - Rain
+            - Snow
+            - Mist
+            - Smoke
+            - Haze
+            - Dust
+            - Ash
+            - Fog
+            - Sand
+            - Squall
+            - Tornado
+            - Clear
+            - Clouds
+            */
+
+            //Getting the hours of the actual time to change the background
+            val formatter = DateTimeFormatter.ofPattern("HH")
+            val formatted = actualTime.format(formatter)
+
+            val isDay = formatted.toInt() in 7..17 // We determine the day time between 7h and 16h
+
+            //Depending on the API results, we will use the correct video
+            when (weatherID)
             {
-                /* Extracting JSON returns from the API */
-                val jsonObj = JSONObject(result)
-
-                /*
-                val main = jsonObj.getJSONObject("main")
-                val sys = jsonObj.getJSONObject("sys")
-                val wind = jsonObj.getJSONObject("wind")
-
-                val updatedAt: Long = jsonObj.getLong("dt")
-                val updatedAtText =
-                    "Updated at: " + SimpleDateFormat("dd/MM/yyyy hh:mm a", Locale.ENGLISH).format(
-                        Date(updatedAt * 1000)
-                    )
-                val temp = main.getString("temp") + "°C"
-                val tempMin = "Min Temp: " + main.getString("temp_min") + "°C"
-                val tempMax = "Max Temp: " + main.getString("temp_max") + "°C"
-                val pressure = main.getString("pressure")
-                val humidity = main.getString("humidity")
-
-                val sunrise: Long = sys.getLong("sunrise")
-                val sunset: Long = sys.getLong("sunset")
-                val windSpeed = wind.getString("speed")
-                val weatherDescription = weather.getString("description")
-                */
-
-                val weather = jsonObj.getJSONArray("weather").getJSONObject(0)
-                val weatherID = weather.getString("main")
-
-
-                /* TO CHECK :
-                - Thunderstorm
-                - Drizzle
-                - Rain
-                - Snow
-                - Mist
-                - Smoke
-                - Haze
-                - Dust
-                - Ash
-                - Fog
-                - Sand
-                - Squall
-                - Tornado
-                - Clear
-                - Clouds
-                */
-
-                //Getting the hours of the actual time to change the background
-                val formatter = DateTimeFormatter.ofPattern("HH")
-                val formatted = actualTime.format(formatter)
-
-                var isDay = if (formatted.toInt() in 7..17) true else false // We determine the day time between 7h and 16h
-
-
-                //Depending on the API results, we will use the correct video
-                when (weatherID)
+                "Fog"  ->
                 {
-                    "Fog"  ->
-                    {
-                        if (isDay) bgVideoView.setVideoPath(resPath + R.raw.fog)
-                        else bgVideoView.setVideoPath(resPath + R.raw.fog) //TODO : find fog at night video
-                    }
-                    "Rain" ->
-                    {
-                        if (isDay) bgVideoView.setVideoPath(resPath + R.raw.rain)
-                        else bgVideoView.setVideoPath(resPath + R.raw.rain) //TODO : find rain at night video
-                    }
-                    "Snow" ->
-                    {
-                        if (isDay) bgVideoView.setVideoPath(resPath + R.raw.snow_day)
-                        else bgVideoView.setVideoPath(resPath + R.raw.snow_night)
-                    }
-                    else   ->
-                    {
-                        if (isDay) bgVideoView.setVideoPath(resPath + R.raw.day)
-                        else bgVideoView.setVideoPath(resPath + R.raw.night)
-                    }
-
+                    if (isDay) bgVideoView.setVideoPath(resPath + R.raw.fog)
+                    else bgVideoView.setVideoPath(resPath + R.raw.fog) //TODO : find fog at night video
                 }
-
-                bgVideoView.start()
-
+                "Rain" ->
+                {
+                    if (isDay) bgVideoView.setVideoPath(resPath + R.raw.rain)
+                    else bgVideoView.setVideoPath(resPath + R.raw.rain) //TODO : find rain at night video
+                }
+                "Snow" ->
+                {
+                    if (isDay) bgVideoView.setVideoPath(resPath + R.raw.snow_day)
+                    else bgVideoView.setVideoPath(resPath + R.raw.snow_night)
+                }
+                else   ->
+                {
+                    if (isDay) bgVideoView.setVideoPath(resPath + R.raw.day)
+                    else bgVideoView.setVideoPath(resPath + R.raw.night)
+                }
             }
-            catch (e: Exception)
-            {
-                println("Error !!")
-            }
+            bgVideoView.start()
+        }
+        catch (e: Exception)
+        {
+            Log.e(TAG, "Error: $e")
         }
     }
 }
