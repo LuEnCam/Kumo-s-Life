@@ -25,7 +25,9 @@ import androidx.work.WorkManager
 import ch.hearc.kumoslife.R
 import ch.hearc.kumoslife.SpriteView
 import ch.hearc.kumoslife.model.AppDatabase
+import ch.hearc.kumoslife.model.shop.Food
 import ch.hearc.kumoslife.model.statistics.Statistic
+import ch.hearc.kumoslife.modelview.ShopViewModel
 import ch.hearc.kumoslife.modelview.StatisticViewModel
 import java.util.*
 import java.time.LocalDateTime
@@ -36,6 +38,7 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
 import java.util.concurrent.Executors
 import android.widget.Toast
+import ch.hearc.kumoslife.MinigameActivity
 import java.util.concurrent.ExecutorService
 
 class MainActivity : AppCompatActivity()
@@ -56,9 +59,12 @@ class MainActivity : AppCompatActivity()
 
     private lateinit var bgVideoView: VideoView
     private lateinit var viewModel: StatisticViewModel
+    private lateinit var shopViewModel: ShopViewModel
     private val buttonList: LinkedList<Button> = LinkedList<Button>()
     private val workManager = WorkManager.getInstance(application) // unused every time but needed to instantiate
     private var isLightOn = true
+
+    private val MINIGAME_REQUEST_CODE = 1
 
     @ExperimentalTime
     override fun onCreate(savedInstanceState: Bundle?)
@@ -76,7 +82,7 @@ class MainActivity : AppCompatActivity()
         val mouthImageView = findViewById<ImageView>(R.id.mouth_imageView)
 
         // Adding the drawables (images + gifs) to the ImageViews with Glade
-        Glide.with(this).load(R.raw.eye).into(eyesImageView)
+        Glide.with(this).load(R.drawable.eye).into(eyesImageView)
         Glide.with(this).load(R.drawable.mouth_happy_white).into(mouthImageView)
 
         // Background video initialization
@@ -103,6 +109,12 @@ class MainActivity : AppCompatActivity()
         }
         buttonList.add(toShopButton)
 
+        val toMinigameButton = findViewById<Button>(R.id.mainToMinigameButton)
+        toMinigameButton.setOnClickListener() {
+            intent = Intent(this, MinigameActivity::class.java)
+            startActivityForResult(intent, MINIGAME_REQUEST_CODE)
+        }
+
         // Turn off/on light
         findViewById<Button>(R.id.mainLightButton).setOnClickListener() {
             isLightOn = !isLightOn
@@ -128,6 +140,7 @@ class MainActivity : AppCompatActivity()
 
         // Data base initialization
         val db = AppDatabase.getInstance(applicationContext)
+
         viewModel = StatisticViewModel.getInstance(this)
 
         // Data base insertion of fresh new rows
@@ -157,6 +170,8 @@ class MainActivity : AppCompatActivity()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         //Directly fetch localisation at app startup
+
+        shopDatabase(db)
         val weatherTimerTask: TimerTask = object : TimerTask()
         {
             override fun run()
@@ -170,11 +185,43 @@ class MainActivity : AppCompatActivity()
 
     }
 
+    private fun shopDatabase(db: AppDatabase)
+    {
+
+        shopViewModel = ShopViewModel.getInstance(this)
+        shopViewModel.setDatabase(db)
+        shopViewModel.resetFood();
+
+    }
+
+    fun getImageRId(s: String): Int
+    {
+        return resources.getIdentifier(s, "drawable", packageName)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
+    {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == MINIGAME_REQUEST_CODE)
+        {
+            if (resultCode == RESULT_OK)
+            {
+                if (data != null && data.extras != null)
+                {
+                    val returnedData = data.extras!!.get(MinigameActivity.MINIGAME_COLLECTED_ID)
+                    Toast.makeText(this, "Collected $returnedData unit(s) of FROOTS", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+
     override fun onResume()
     {
         super.onResume()
         bgVideoView.start()
     }
+
 
     @ExperimentalTime
     private fun getCurrentLocation()

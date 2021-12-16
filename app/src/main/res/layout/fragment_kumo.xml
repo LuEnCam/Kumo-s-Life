@@ -8,8 +8,8 @@
 
     <ch.hearc.kumoslife.SpriteView
         android:id="@+id/kumo_spriteView"
-        android:layout_width="260dp"
-        android:layout_height="260dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         app:columns="3"
         app:fps="3"
         app:isFixedRow="true"
@@ -22,24 +22,26 @@
         app:rows="3"
         app:src="@raw/spritekumo" />
 
+    s
+
     <ImageView
         android:id="@+id/eyes_imageView"
-        android:layout_width="260dp"
-        android:layout_height="260dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="@+id/kumo_spriteView"
         app:layout_constraintEnd_toEndOf="@+id/kumo_spriteView"
         app:layout_constraintStart_toStartOf="@+id/kumo_spriteView"
         app:layout_constraintTop_toTopOf="@+id/kumo_spriteView"
-        tools:srcCompat="@raw/eye" />
+        app:srcCompat="@drawable/eye" />
 
     <ImageView
         android:id="@+id/mouth_imageView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="@+id/kumo_spriteView"
         app:layout_constraintEnd_toEndOf="@+id/kumo_spriteView"
         app:layout_constraintStart_toStartOf="@+id/kumo_spriteView"
         app:layout_constraintTop_toTopOf="@+id/kumo_spriteView"
-        android:layout_width="260dp"
-        android:layout_height="260dp"
-        tools:srcCompat="@drawable/mouth_happy_white" />
+        app:srcCompat="@drawable/mouth_happy_white" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
