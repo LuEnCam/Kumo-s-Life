@@ -118,6 +118,11 @@ class MainActivity : AppCompatActivity()
 
     }
 
+    fun getImageRId(s: String): Int
+    {
+        return resources.getIdentifier(s, "drawable", packageName)
+    }
+
 
 
     override fun onResume()

@@ -54,4 +54,5 @@ class ShopActivity : AppCompatActivity()
     {
         adapter.setData(list)
     }
+
 }
