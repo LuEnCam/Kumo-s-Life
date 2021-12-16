@@ -25,7 +25,9 @@ import androidx.work.WorkManager
 import ch.hearc.kumoslife.R
 import ch.hearc.kumoslife.SpriteView
 import ch.hearc.kumoslife.model.AppDatabase
+import ch.hearc.kumoslife.model.shop.Food
 import ch.hearc.kumoslife.model.statistics.Statistic
+import ch.hearc.kumoslife.modelview.ShopViewModel
 import ch.hearc.kumoslife.modelview.StatisticViewModel
 import java.util.*
 import java.time.LocalDateTime
@@ -57,6 +59,7 @@ class MainActivity : AppCompatActivity()
 
     private lateinit var bgVideoView: VideoView
     private lateinit var viewModel: StatisticViewModel
+    private lateinit var shopViewModel: ShopViewModel
     private val buttonList: LinkedList<Button> = LinkedList<Button>()
     private val workManager = WorkManager.getInstance(application) // unused every time but needed to instantiate
     private var isLightOn = true
@@ -135,6 +138,7 @@ class MainActivity : AppCompatActivity()
 
         // Data base initialization
         val db = AppDatabase.getInstance(applicationContext)
+
         viewModel = StatisticViewModel.getInstance(this)
 
         // Data base insertion of fresh new rows
@@ -164,6 +168,8 @@ class MainActivity : AppCompatActivity()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         //Directly fetch localisation at app startup
+
+        shopDatabase(db)
         val weatherTimerTask: TimerTask = object : TimerTask()
         {
             override fun run()
@@ -177,11 +183,28 @@ class MainActivity : AppCompatActivity()
 
     }
 
+    private fun shopDatabase(db: AppDatabase)
+    {
+
+        shopViewModel = ShopViewModel.getInstance(this)
+        shopViewModel.setDatabase(db)
+        shopViewModel.resetFood();
+
+    }
+
+    fun getImageRId(s: String): Int
+    {
+        return resources.getIdentifier(s, "drawable", packageName)
+    }
+
+
+
     override fun onResume()
     {
         super.onResume()
         bgVideoView.start()
     }
+
 
     @ExperimentalTime
     private fun getCurrentLocation()

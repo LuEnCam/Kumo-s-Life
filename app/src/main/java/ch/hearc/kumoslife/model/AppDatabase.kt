@@ -1,15 +1,18 @@
 package ch.hearc.kumoslife.model
 
 import android.content.Context
+import androidx.room.AutoMigration
 import android.util.Log
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import ch.hearc.kumoslife.model.shop.Food
+import ch.hearc.kumoslife.model.shop.ShopDao
 import ch.hearc.kumoslife.model.statistics.Statistic
 import ch.hearc.kumoslife.model.statistics.StatisticDao
 import ch.hearc.kumoslife.views.statistics.StatisticsWorker
 
-@Database(entities = [Statistic::class], version = 1)
+@Database(entities = [Statistic::class, Food::class], version = 4)
 abstract class AppDatabase : RoomDatabase()
 {
     // Static instance: singleton
@@ -24,7 +27,7 @@ abstract class AppDatabase : RoomDatabase()
             if (instance == null)
             {
                 Log.i(TAG, "Data base initialization")
-                instance = Room.databaseBuilder(context, AppDatabase::class.java, DB_NAME).build()
+                instance = Room.databaseBuilder(context, AppDatabase::class.java, DB_NAME).fallbackToDestructiveMigration().build()
             }
             return instance as AppDatabase
         }
@@ -37,4 +40,6 @@ abstract class AppDatabase : RoomDatabase()
     }
 
     abstract fun statisticDao(): StatisticDao
+
+    abstract fun shopDao(): ShopDao
 }
