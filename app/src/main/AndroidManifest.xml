@@ -23,6 +23,10 @@
             android:exported="false">
         </activity>
         <activity
+            android:name="MinigameActivity"
+            android:exported="false">
+        </activity>
+        <activity
             android:name=".views.MainActivity"
             android:exported="true">
             <intent-filter>

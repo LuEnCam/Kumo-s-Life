@@ -36,6 +36,7 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
 import java.util.concurrent.Executors
 import android.widget.Toast
+import ch.hearc.kumoslife.MinigameActivity
 import java.util.concurrent.ExecutorService
 
 class MainActivity : AppCompatActivity()
@@ -76,7 +77,7 @@ class MainActivity : AppCompatActivity()
         val mouthImageView = findViewById<ImageView>(R.id.mouth_imageView)
 
         // Adding the drawables (images + gifs) to the ImageViews with Glade
-        Glide.with(this).load(R.raw.eye).into(eyesImageView)
+        Glide.with(this).load(R.drawable.eye).into(eyesImageView)
         Glide.with(this).load(R.drawable.mouth_happy_white).into(mouthImageView)
 
         // Background video initialization
@@ -102,6 +103,12 @@ class MainActivity : AppCompatActivity()
             startActivity(intent)
         }
         buttonList.add(toShopButton)
+
+        val toMinigameButton = findViewById<Button>(R.id.mainToMinigameButton)
+        toMinigameButton.setOnClickListener() {
+            intent = Intent(this, MinigameActivity::class.java)
+            startActivity(intent)
+        }
 
         // Turn off/on light
         findViewById<Button>(R.id.mainLightButton).setOnClickListener() {
