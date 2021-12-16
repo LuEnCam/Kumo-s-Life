@@ -365,7 +365,7 @@ class MainActivity : AppCompatActivity()
             {
                 "Fog"  ->
                 {
-                    if (!isDay) bgVideoView.setVideoPath(resPath + R.raw.day_fog)
+                    if (isDay) bgVideoView.setVideoPath(resPath + R.raw.day_fog)
                     else bgVideoView.setVideoPath(resPath + R.raw.night_fog)
                 }
                 "Mist"  ->
