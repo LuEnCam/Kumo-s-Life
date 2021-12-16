@@ -2,6 +2,7 @@ package ch.hearc.kumoslife.views.shop
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -9,7 +10,9 @@ import androidx.recyclerview.widget.RecyclerView
 import ch.hearc.kumoslife.R
 import ch.hearc.kumoslife.model.shop.Food
 import ch.hearc.kumoslife.model.shop.Item
+import ch.hearc.kumoslife.model.statistics.Statistic
 import ch.hearc.kumoslife.modelview.ShopViewModel
+import ch.hearc.kumoslife.modelview.StatisticViewModel
 import ch.hearc.kumoslife.views.shop.ItemAdapter
 
 class ShopActivity : AppCompatActivity()
@@ -21,10 +24,11 @@ class ShopActivity : AppCompatActivity()
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_shop)
+        adapter = ItemAdapter()
 
         ShopViewModel.getInstance().getAllFood(this::updateResult)
 
-        adapter = ItemAdapter()
+
 
 
         val recyclerView: RecyclerView = findViewById(R.id.shopRecyclerView)
@@ -33,8 +37,18 @@ class ShopActivity : AppCompatActivity()
         recyclerView.adapter = adapter
 
         adapter.onItemClick = { item ->
+            if (item is Food) {
+                val statisticViewModel = StatisticViewModel.getInstance();
+                val stat = statisticViewModel.getStatisticByName("Hunger")
+                if (stat != null)
+                {
+                    val prec: String = stat.name + stat.value
+                    statisticViewModel.decrease(item.nutritiveValue.toDouble(), stat)
+                    Toast.makeText(applicationContext, "Miam !\nKumo a encroe faim de" + stat.value, Toast.LENGTH_SHORT).show()
+                }
 
-            Toast.makeText(applicationContext, item.name, Toast.LENGTH_SHORT).show()
+            }
+
         }
 
         adapter.getImageId = this::getImageRId
