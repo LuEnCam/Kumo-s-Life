@@ -8,8 +8,8 @@
 
     <ch.hearc.kumoslife.SpriteView
         android:id="@+id/kumo_spriteView"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="256dp"
+        android:layout_height="208.5dp"
         app:columns="3"
         app:fps="3"
         app:isFixedRow="true"
@@ -19,8 +19,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:renderRow="0"
-        app:rows="3"
-        app:src="@raw/spritekumo" />
+        app:rows="2"
+        app:src="@drawable/spritekumo" />
 
     s
 
@@ -32,7 +32,7 @@
         app:layout_constraintEnd_toEndOf="@+id/kumo_spriteView"
         app:layout_constraintStart_toStartOf="@+id/kumo_spriteView"
         app:layout_constraintTop_toTopOf="@+id/kumo_spriteView"
-        app:srcCompat="@drawable/eye" />
+        app:srcCompat="@raw/eye" />
 
     <ImageView
         android:id="@+id/mouth_imageView"
@@ -42,6 +42,6 @@
         app:layout_constraintEnd_toEndOf="@+id/kumo_spriteView"
         app:layout_constraintStart_toStartOf="@+id/kumo_spriteView"
         app:layout_constraintTop_toTopOf="@+id/kumo_spriteView"
-        app:srcCompat="@drawable/mouth_happy_white" />
+        app:srcCompat="@drawable/mouth_happy" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

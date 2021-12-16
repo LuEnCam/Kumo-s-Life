@@ -76,14 +76,12 @@ class MainActivity : AppCompatActivity()
 
         setContentView(R.layout.activity_main)
 
-        //
-        val cloudSpriteView = findViewById<SpriteView>(R.id.kumo_spriteView)
         val eyesImageView = findViewById<ImageView>(R.id.eyes_imageView)
         val mouthImageView = findViewById<ImageView>(R.id.mouth_imageView)
 
         // Adding the drawables (images + gifs) to the ImageViews with Glade
-        Glide.with(this).load(R.drawable.eye).into(eyesImageView)
-        Glide.with(this).load(R.drawable.mouth_happy_white).into(mouthImageView)
+        Glide.with(this).load(R.raw.eye).into(eyesImageView)
+        Glide.with(this).load(R.drawable.mouth_happy).into(mouthImageView)
 
         // Background video initialization
         bgVideoView = findViewById(R.id.mainBgVideo)
@@ -144,7 +142,7 @@ class MainActivity : AppCompatActivity()
         viewModel = StatisticViewModel.getInstance(this)
 
         // Data base insertion of fresh new rows
-        // viewModel.initDataBase()
+        //viewModel.initDataBase()
 
         // Data base update every 15 mins
         // val statisticsWorker = PeriodicWorkRequestBuilder<StatisticsWorker>(15, TimeUnit.MINUTES).build()
@@ -367,6 +365,7 @@ class MainActivity : AppCompatActivity()
                 {
                     if (isDay) bgVideoView.setVideoPath(resPath + R.raw.day_fog)
                     else bgVideoView.setVideoPath(resPath + R.raw.night_fog)
+                    changeKumosColor(1)
                 }
                 "Mist"  ->
                 {
@@ -377,6 +376,7 @@ class MainActivity : AppCompatActivity()
                 {
                     if (isDay) bgVideoView.setVideoPath(resPath + R.raw.rain)
                     else bgVideoView.setVideoPath(resPath + R.raw.rain_night)
+                    changeKumosColor(2)
                 }
                 "Snow" ->
                 {
@@ -396,5 +396,12 @@ class MainActivity : AppCompatActivity()
         {
             Log.e(TAG, "Error: $e")
         }
+    }
+
+    private fun changeKumosColor(_value:Int)
+    {
+        val cloudSpriteView = findViewById<SpriteView>(R.id.kumo_spriteView)
+        cloudSpriteView.renderRow = _value
+
     }
 }
