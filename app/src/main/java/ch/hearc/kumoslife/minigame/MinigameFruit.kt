@@ -32,14 +32,14 @@ class MinigameFruit(x: Float, y: Float, context: Activity) {
         Log.i("MinigameFruit", "New fruit view with id: ${view.id}")
         
         val fruits = arrayOf(
-            R.drawable.flat_apple,
-            R.drawable.flat_apricot,
-            R.drawable.flat_banana,
-            R.drawable.flat_cherry,
-            R.drawable.flat_grape,
-            R.drawable.flat_pear,
-            R.drawable.flat_pinapple,
-            R.drawable.flat_strawberry
+            R.drawable.apple,
+            R.drawable.apricot,
+            R.drawable.banana,
+            R.drawable.cherry,
+            R.drawable.grapes,
+            R.drawable.pear,
+            R.drawable.pineapple,
+            R.drawable.strawberry
         )
 
         view.setImageResource(fruits[Random.nextInt(fruits.size)])
