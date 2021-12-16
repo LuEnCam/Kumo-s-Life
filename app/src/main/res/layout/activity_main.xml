@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".views.MainActivity">
 
     <VideoView
         android:id="@+id/mainBgVideo"
@@ -18,28 +18,12 @@
     <fragment
         android:id="@+id/mainKumoFragment"
         android:name="ch.hearc.kumoslife.KumoFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-    
-    <Button
-        android:id="@+id/btGetLocation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:text="Get Current Location"
-        android:textColor="@android:color/white"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="30dp" />
-
-    <TextView
-        android:id="@+id/textView_weater_main"
-        android:layout_width="0dp"
-        android:layout_height="27dp"
-        android:layout_marginTop="5dp"
-        android:text="TextView"
+        android:layout_width="256dp"
+        android:layout_height="256dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btGetLocation" />
+        app:layout_constraintTop_toTopOf="@+id/mainBgVideo" />
 
     <Button
         android:id="@+id/mainToStatisticsButton"
@@ -50,4 +34,46 @@
         android:text="Stats"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/mainToShopButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="32dp"
+        android:text="Shop"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/mainLightButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="Light"
+        app:layout_constraintEnd_toStartOf="@+id/mainToShopButton"
+        app:layout_constraintStart_toEndOf="@+id/mainToStatisticsButton"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/mainLightBg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#99000000"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="invisible" />
+
+    <Button
+        android:id="@+id/mainToMinigameButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginBottom="32dp"
+        android:text="Minigame"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

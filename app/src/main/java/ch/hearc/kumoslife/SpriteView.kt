@@ -11,17 +11,20 @@ import java.util.*
 import kotlin.concurrent.schedule
 
 
-class SpriteView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
+class SpriteView(context: Context, attrs: AttributeSet?) : View(context, attrs)
+{
     var image: Bitmap? = null
     var spriteWidth = 0.0
     var spriteHeight = 0.0
     var columns = 4
-    set(value) {
-        lastFrame = value * rows
-        field = value
-    }
+        set(value)
+        {
+            lastFrame = value * rows
+            field = value
+        }
     var rows = 4
-        set(value) {
+        set(value)
+        {
             lastFrame = columns * value
             field = value
         }
@@ -31,11 +34,12 @@ class SpriteView(context: Context, attrs: AttributeSet?) : View(context, attrs) 
     var isFixedRow = false
     var autoPlay = true
     val isRunning: Boolean
-        get() {
-        return running
-    }
-//    var maxCycles = 0
-//    var currentCycle = 0
+        get()
+        {
+            return running
+        }
+    // var maxCycles = 0
+    // var currentCycle = 0
     var stateChangeListener: StateChangeListener? = null
 
     var renderRow = 0
@@ -46,11 +50,11 @@ class SpriteView(context: Context, attrs: AttributeSet?) : View(context, attrs) 
     private val dstFrame = Rect()
     private var timer = Timer()
 
-    init {
-        if (attrs != null) {
-            val a = context.obtainStyledAttributes(
-                attrs, R.styleable.SpriteView, 0, 0
-            )
+    init
+    {
+        if (attrs != null)
+        {
+            val a = context.obtainStyledAttributes(attrs, R.styleable.SpriteView, 0, 0)
             image = a.getDrawable(R.styleable.SpriteView_src)?.toBitmap()
             columns = a.getInt(R.styleable.SpriteView_columns, columns)
             rows = a.getInt(R.styleable.SpriteView_rows, rows)
@@ -60,27 +64,29 @@ class SpriteView(context: Context, attrs: AttributeSet?) : View(context, attrs) 
             isFixedRow = a.getBoolean(R.styleable.SpriteView_isFixedRow, isFixedRow)
             autoPlay = a.getBoolean(R.styleable.SpriteView_autoPlay, autoPlay)
 
-//            maxCycles = a.getInt(R.styleable.SpriteView_cycles, maxCycles)
+            // maxCycles = a.getInt(R.styleable.SpriteView_cycles, maxCycles)
             a.recycle()
-            if (autoPlay)
-                start()
+            if (autoPlay) start()
         }
     }
 
     constructor(context: Context) : this(context, null)
 
 
-    fun start() {
+    fun start()
+    {
         stop()
 
-        if (image != null) {
+        if (image != null)
+        {
             spriteWidth = image!!.width.toDouble() / columns
             spriteHeight = image!!.height.toDouble() / rows
 
             timer.schedule(0, (1000 / fps).toLong()) {
                 running = true
                 invalidate()
-                if (lastFrame == currentFrame) {
+                if (lastFrame == currentFrame)
+                {
                     resetFrames()
                 }
                 currentFrame++
@@ -98,12 +104,12 @@ class SpriteView(context: Context, attrs: AttributeSet?) : View(context, attrs) 
         }
     }
 
-    fun stop() {
+    fun stop()
+    {
         pause()
-        if (currentFrame > 0)
-            post {
-                stateChangeListener?.onStop(this)
-            }
+        if (currentFrame > 0) post {
+            stateChangeListener?.onStop(this)
+        }
 
         resetFrames()
         invalidate()
@@ -111,19 +117,23 @@ class SpriteView(context: Context, attrs: AttributeSet?) : View(context, attrs) 
 //        currentCycle = 0
     }
 
-    fun pause() {
+    fun pause()
+    {
         timer.cancel()
         timer = Timer()
     }
 
-    fun resetFrames() {
+    fun resetFrames()
+    {
         renderRow = if (isFixedRow) renderRow else 0
         renderColumn = 0
         currentFrame = 0
     }
 
-    override fun onDraw(canvas: Canvas?) {
-        if (image != null) {
+    override fun onDraw(canvas: Canvas?)
+    {
+        if (image != null)
+        {
             val srcX = renderColumn * spriteWidth
             val srcY = renderRow * spriteHeight
             srcFrame.left = srcX.toInt()
@@ -137,7 +147,8 @@ class SpriteView(context: Context, attrs: AttributeSet?) : View(context, attrs) 
             dstFrame.bottom = height
 
             canvas?.drawBitmap(image!!, srcFrame, dstFrame, null)
-            if (renderColumn == columns - 1 && !isFixedRow) {
+            if (renderColumn == columns - 1 && !isFixedRow)
+            {
                 renderRow = ++renderRow % rows
             }
             renderColumn = ++renderColumn % columns
