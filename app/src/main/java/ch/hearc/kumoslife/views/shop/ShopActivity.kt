@@ -26,14 +26,12 @@ class ShopActivity : AppCompatActivity()
 
         adapter = ItemAdapter()
 
-
         val recyclerView: RecyclerView = findViewById(R.id.shopRecyclerView)
         recyclerView.stopScroll()
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
 
         adapter.onItemClick = { item ->
-
             Toast.makeText(applicationContext, item.name, Toast.LENGTH_SHORT).show()
         }
 
@@ -45,7 +43,7 @@ class ShopActivity : AppCompatActivity()
         }
     }
 
-    fun getImageRId(s: String): Int
+    private fun getImageRId(s: String): Int
     {
         return resources.getIdentifier(s, "drawable", packageName)
     }
