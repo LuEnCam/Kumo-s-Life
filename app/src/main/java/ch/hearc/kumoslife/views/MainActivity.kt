@@ -156,8 +156,9 @@ class MainActivity : AppCompatActivity()
             {
                 if (data != null && data.extras != null)
                 {
-                    val returnedData = data.extras!!.get(MinigameActivity.MINIGAME_COLLECTED_ID)
+                    val returnedData = data.extras!!.get(MinigameActivity.MINIGAME_COLLECTED_ID) as Int
                     Toast.makeText(this, "Collected $returnedData unit(s) of FROOTS", Toast.LENGTH_SHORT).show()
+                    addMoney(returnedData)
                 }
             }
         }
