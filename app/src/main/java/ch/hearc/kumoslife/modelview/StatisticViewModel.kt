@@ -6,7 +6,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.work.WorkManager
 import ch.hearc.kumoslife.model.AppDatabase
 import ch.hearc.kumoslife.model.statistics.Statistic
 import ch.hearc.kumoslife.model.statistics.StatisticDao
@@ -59,6 +58,7 @@ class StatisticViewModel : ViewModel()
             statisticDao.insert(Statistic(0, "Activity", 10.0, 12.5))
             statisticDao.insert(Statistic(0, "Sleep", 15.0, 2.3))
             statisticDao.insert(Statistic(0, "Sickness", 26.0, 1.0))
+            statisticsLiveData.postValue(statisticDao.getAll() as ArrayList<Statistic>)
         }
     }
 

@@ -44,7 +44,6 @@ import androidx.core.content.ContextCompat
 import java.io.File
 import java.io.IOException
 
-
 enum class KumosKolor
 {
     WHITE, GREEN, GRAY
@@ -57,7 +56,8 @@ class MainActivity : AppCompatActivity()
     private val TAG: String = MainActivity::class.java.name
     private val LOCATION_PERMISSION_REQ_CODE = 1000
     private val REQUEST_PERM_ACCESS = 1
-    val API = "9d783bddf8b3eaa718e7d926a18ccb1c"    //API key used : allows 60 calls per minute
+    private val MINIGAME_REQUEST_CODE = 1
+    val API = "9d783bddf8b3eaa718e7d926a18ccb1c"     //API key used : allows 60 calls per minute
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     var latitude: Double = 0.0
@@ -74,13 +74,8 @@ class MainActivity : AppCompatActivity()
     private val amplitudes: MutableList<Double> = MutableList(5) { 0.0 }
 
     private lateinit var bgVideoView: VideoView
-    private lateinit var viewModel: StatisticViewModel
-    private lateinit var shopViewModel: ShopViewModel
     private val buttonList: LinkedList<Button> = LinkedList<Button>()
-    private val workManager = WorkManager.getInstance(application) // unused every time but needed to instantiate
     private var isLightOn = true
-
-    private val MINIGAME_REQUEST_CODE = 1
 
     @ExperimentalTime
     override fun onCreate(savedInstanceState: Bundle?)
@@ -109,30 +104,22 @@ class MainActivity : AppCompatActivity()
 
         createButtons()
 
-        // Data base initialization
-        AppDatabase.getInstance(applicationContext)
-        viewModel = StatisticViewModel.getInstance(this)
-
-        shopViewModel = ShopViewModel.getInstance(this)
-        shopViewModel.resetFood()
-
-        // Data base insertion of fresh new rows
-        //viewModel.initDataBase()
-
-        // Data base update every 15 mins
-        // val statisticsWorker = PeriodicWorkRequestBuilder<StatisticsWorker>(15, TimeUnit.MINUTES).build()
-        // workManager.enqueueUniquePeriodicWork("statisticsWorker", ExistingPeriodicWorkPolicy.KEEP, statisticsWorker)
+        // Data base initialisation
+        AppDatabase.getInstance(this)
+        StatisticViewModel.getInstance(this)
+        ShopViewModel.getInstance(this)
 
         // Update light value
         val lightTimerTask: TimerTask = object : TimerTask()
         {
             override fun run()
             {
-                val stat: Statistic? = viewModel.getStatisticByName("Sleep")
+                val statisticViewModel = StatisticViewModel.getInstance()
+                val stat: Statistic? = statisticViewModel.getStatisticByName("Sleep")
                 if (stat != null && !isLightOn)
                 {
                     Log.i(TAG, "Decrease sleep value")
-                    viewModel.decrease(1.0, stat)
+                    statisticViewModel.decrease(1.0, stat)
                 }
             }
         }
@@ -229,6 +216,8 @@ class MainActivity : AppCompatActivity()
         val toStatisticsButton: Button = findViewById(R.id.mainToStatisticsButton)
         toStatisticsButton.setOnClickListener {
             intent = Intent(this, StatisticsActivity::class.java)
+            Log.i(TAG, "to Statistics")
+            Log.i(TAG, StatisticViewModel.getInstance().getAllStatistics().value.toString())
             startActivity(intent)
         }
         buttonList.add(toStatisticsButton)
