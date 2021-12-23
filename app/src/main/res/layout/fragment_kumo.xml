@@ -6,10 +6,12 @@
     android:layout_height="match_parent"
     tools:context=".KumoFragment">
 
+    s
+
     <ch.hearc.kumoslife.SpriteView
         android:id="@+id/kumo_spriteView"
-        android:layout_width="256dp"
-        android:layout_height="208.5dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         app:columns="3"
         app:fps="3"
         app:isFixedRow="true"
@@ -21,8 +23,6 @@
         app:renderRow="0"
         app:rows="2"
         app:src="@drawable/spritekumo" />
-
-    s
 
     <ImageView
         android:id="@+id/eyes_imageView"

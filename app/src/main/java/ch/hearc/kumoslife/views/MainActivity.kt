@@ -41,6 +41,12 @@ import android.widget.Toast
 import ch.hearc.kumoslife.MinigameActivity
 import java.util.concurrent.ExecutorService
 
+enum class KumosKolor {
+    WHITE,
+    GREEN,
+    GRAY
+}
+
 class MainActivity : AppCompatActivity()
 {
     private val resPath: String = "android.resource://ch.hearc.kumoslife/"
@@ -365,7 +371,7 @@ class MainActivity : AppCompatActivity()
                 {
                     if (isDay) bgVideoView.setVideoPath(resPath + R.raw.day_fog)
                     else bgVideoView.setVideoPath(resPath + R.raw.night_fog)
-                    changeKumosColor(1)
+                    changeKumosColor(KumosKolor.GREEN)
                 }
                 "Mist"  ->
                 {
@@ -376,7 +382,7 @@ class MainActivity : AppCompatActivity()
                 {
                     if (isDay) bgVideoView.setVideoPath(resPath + R.raw.rain)
                     else bgVideoView.setVideoPath(resPath + R.raw.rain_night)
-                    changeKumosColor(2)
+                    changeKumosColor(KumosKolor.WHITE)
                 }
                 "Snow" ->
                 {
@@ -391,6 +397,7 @@ class MainActivity : AppCompatActivity()
             }
             bgVideoView.start()
             Log.i(TAG, "Starting bgVideoView with .start()")
+            Toast.makeText(this, "${weatherID}", Toast.LENGTH_SHORT).show()
         }
         catch (e: Exception)
         {
@@ -398,10 +405,10 @@ class MainActivity : AppCompatActivity()
         }
     }
 
-    private fun changeKumosColor(_value:Int)
+    private fun changeKumosColor(_value:KumosKolor)
     {
         val cloudSpriteView = findViewById<SpriteView>(R.id.kumo_spriteView)
-        cloudSpriteView.renderRow = _value
+        cloudSpriteView.renderRow = _value.ordinal
 
     }
 }
