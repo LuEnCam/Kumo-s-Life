@@ -1,9 +1,12 @@
 package ch.hearc.kumoslife.views.shop
 
+import android.content.Context
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -28,9 +31,6 @@ class ShopActivity : AppCompatActivity()
 
         ShopViewModel.getInstance().getAllFood(this::updateResult)
 
-
-
-
         val recyclerView: RecyclerView = findViewById(R.id.shopRecyclerView)
         recyclerView.stopScroll()
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -38,14 +38,24 @@ class ShopActivity : AppCompatActivity()
 
         adapter.onItemClick = { item ->
             if (item is Food) {
-                val statisticViewModel = StatisticViewModel.getInstance();
-                val stat = statisticViewModel.getStatisticByName("Hunger")
-                if (stat != null)
+                if (removeMoney(item.prize))
                 {
-                    val prec: String = stat.name + stat.value
-                    statisticViewModel.decrease(item.nutritiveValue.toDouble(), stat)
-                    Toast.makeText(applicationContext, "Miam !\nKumo a encroe faim de" + stat.value, Toast.LENGTH_SHORT).show()
+                    val statisticViewModel = StatisticViewModel.getInstance();
+                    val stat = statisticViewModel.getStatisticByName("Hunger")
+                    if (stat != null)
+                    {
+                        //val prec: String = stat.name + stat.value
+                        statisticViewModel.decrease(item.nutritiveValue.toDouble(), stat)
+
+
+                        Toast.makeText(applicationContext, "Miam !\nKumo a encroe faim de " + stat.value, Toast.LENGTH_SHORT).show()
+                    }
                 }
+                else
+                {
+                    Toast.makeText(applicationContext, "Oooops tu n'as pas assez d'argent !", Toast.LENGTH_SHORT).show()
+                }
+
 
             }
 
@@ -57,7 +67,42 @@ class ShopActivity : AppCompatActivity()
         findViewById<Button>(R.id.returnToMainButton).setOnClickListener() {
             finish()
         }
+
+        val textView: TextView = findViewById<TextView>(R.id.money)
+        textView.setText(getMoney().toString())
     }
+
+
+        private fun setMoney(money: Int)
+        {
+            val mPrefs = getSharedPreferences("bag", 0)
+            val mEditor = mPrefs.edit()
+            mEditor.putInt("money", money).commit()
+            val textView: TextView = findViewById<TextView>(R.id.money)
+            textView.setText(getMoney().toString())
+
+        }
+
+        fun getMoney(): Int
+        {
+            val mPrefs = getSharedPreferences("bag", 0)
+            return mPrefs.getInt("money", 0)
+        }
+
+        fun removeMoney(remove: Int) : Boolean
+        {
+            val money = getMoney()
+            if (money >= remove)
+            {
+                setMoney(getMoney() - remove)
+                return true
+            }
+            return false
+        }
+
+
+
+
 
     fun getImageRId(s: String): Int
     {

@@ -192,6 +192,13 @@ class MainActivity : AppCompatActivity()
 
     }
 
+    private fun addMoney(add: Int)
+    {
+        val mPrefs = getSharedPreferences("bag", 0)
+        val mEditor = mPrefs.edit()
+        mEditor.putInt("money", mPrefs.getInt("money", 0) + add).commit()
+    }
+
     fun getImageRId(s: String): Int
     {
         return resources.getIdentifier(s, "drawable", packageName)
