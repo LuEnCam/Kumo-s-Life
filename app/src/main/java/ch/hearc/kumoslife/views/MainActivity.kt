@@ -5,9 +5,6 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
@@ -37,12 +34,22 @@ import com.google.android.gms.location.LocationResult
 import java.util.concurrent.Executors
 import android.widget.Toast
 import java.util.concurrent.ExecutorService
+import android.media.MediaRecorder
+import android.os.*
+import kotlin.math.log10
+import androidx.core.content.ContextCompat
+import java.io.File
+import java.io.IOException
+
 
 class MainActivity : AppCompatActivity()
 {
     private val resPath: String = "android.resource://ch.hearc.kumoslife/"
+    private val recordFileName: String = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath + File.separator + "audiorecordtest.3gp"
     private val TAG: String = MainActivity::class.java.name
     private val LOCATION_PERMISSION_REQ_CODE = 1000
+    private val REQUEST_PERM_ACCESS = 1
+    private val AUDIO_REQUEST_CODE = 200
     val API = "9d783bddf8b3eaa718e7d926a18ccb1c"    //API key used : allows 60 calls per minute
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -53,6 +60,11 @@ class MainActivity : AppCompatActivity()
     //Use of Executor and handler to replace AsyncTasks
     private val weatherExecutor: ExecutorService = Executors.newSingleThreadExecutor()
     private val weatherHandler = Handler(Looper.getMainLooper())
+
+    private var mediaRecorder: MediaRecorder? = null
+    private val referenceAmplitude = 0.0001
+    private var currentAmplitude = 0
+    private val amplitudes: MutableList<Double> = MutableList(5) { 0.0 }
 
     private lateinit var bgVideoView: VideoView
     private lateinit var viewModel: StatisticViewModel
@@ -89,7 +101,7 @@ class MainActivity : AppCompatActivity()
 
         // To statistics
         val toStatisticsButton: Button = findViewById(R.id.mainToStatisticsButton)
-        toStatisticsButton.setOnClickListener() {
+        toStatisticsButton.setOnClickListener {
             intent = Intent(this, StatisticsActivity::class.java)
             startActivity(intent)
         }
@@ -97,14 +109,14 @@ class MainActivity : AppCompatActivity()
 
         // To shop
         val toShopButton: Button = findViewById(R.id.mainToShopButton)
-        toShopButton.setOnClickListener() {
+        toShopButton.setOnClickListener {
             intent = Intent(this, ShopActivity::class.java)
             startActivity(intent)
         }
         buttonList.add(toShopButton)
 
         // Turn off/on light
-        findViewById<Button>(R.id.mainLightButton).setOnClickListener() {
+        findViewById<Button>(R.id.mainLightButton).setOnClickListener {
             isLightOn = !isLightOn
 
             val lightBg: TextView = findViewById(R.id.mainLightBg)
@@ -126,8 +138,22 @@ class MainActivity : AppCompatActivity()
             }
         }
 
+        // Start Yelling
+        findViewById<Button>(R.id.mainYellButton).setOnClickListener {
+            if (mediaRecorder != null)
+            {
+                stopRecording()
+                findViewById<Button>(R.id.mainYellButton).text = "Yell"
+            }
+            else
+            {
+                getVoiceLevel()
+                findViewById<Button>(R.id.mainYellButton).text = "Stop"
+            }
+        }
+
         // Data base initialization
-        val db = AppDatabase.getInstance(applicationContext)
+        AppDatabase.getInstance(applicationContext)
         viewModel = StatisticViewModel.getInstance(this)
 
         // Data base insertion of fresh new rows
@@ -167,13 +193,132 @@ class MainActivity : AppCompatActivity()
         }
         val weatherTimer = Timer()
         weatherTimer.scheduleAtFixedRate(weatherTimerTask, 0, 1000 * 60 * 1)
-
     }
 
     override fun onResume()
     {
         super.onResume()
         bgVideoView.start()
+    }
+
+    override fun onPause()
+    {
+        super.onPause()
+        stopRecording()
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray)
+    {
+        var file = false
+        var mic = false
+
+        if (requestCode == REQUEST_PERM_ACCESS)
+        {
+            var i = 0
+            while (i < grantResults.size)
+            {
+                if (permissions[i].compareTo(Manifest.permission.WRITE_EXTERNAL_STORAGE) == 0 && grantResults[i] == PackageManager.PERMISSION_GRANTED)
+                {
+                    file = true
+                }
+                else if (permissions[i].compareTo(Manifest.permission.RECORD_AUDIO) == 0 && grantResults[i] == PackageManager.PERMISSION_GRANTED)
+                {
+                    mic = true
+                }
+                i++
+            }
+
+            if (mic && file)
+            {
+                // permission was granted
+                Log.i(TAG, "Both permissions has now been granted")
+                startRecording()
+            }
+            else
+            {
+                // permission denied
+                Log.i(TAG, "Both permissions were NOT granted.")
+            }
+            return
+        }
+        else
+        {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        }
+    }
+
+    private fun startRecording()
+    {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(applicationContext, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED)
+        {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO), REQUEST_PERM_ACCESS)
+        }
+        else
+        {
+            mediaRecorder = MediaRecorder()
+            mediaRecorder!!.setAudioSource(MediaRecorder.AudioSource.MIC)
+            mediaRecorder!!.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
+            mediaRecorder!!.setOutputFile(recordFileName)
+            mediaRecorder!!.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
+            try
+            {
+                mediaRecorder!!.prepare()
+            }
+            catch (e: IOException)
+            {
+                Log.e(TAG, "media recorder prepare() failed")
+            }
+            mediaRecorder!!.start()
+        }
+    }
+
+    private fun stopRecording()
+    {
+        mediaRecorder?.stop()
+        mediaRecorder?.release()
+        mediaRecorder = null
+    }
+
+    private fun getVoiceLevel()
+    {
+        startRecording()
+        val handler = Handler()
+        handler.postDelayed(object : Runnable
+        {
+            override fun run()
+            {
+                val amplitude: Double = getAmplitude()
+                amplitudes[currentAmplitude] = amplitude
+
+                val max = amplitudes.maxOrNull() ?: 0.0
+                if (max > 170.0)
+                {
+                    Log.i(TAG, "Stop yelling at Kumo !")
+                    // TODO Change sprite here !
+                }
+
+                currentAmplitude += 1
+                if (currentAmplitude == amplitudes.size)
+                {
+                    currentAmplitude = 0
+                }
+
+                handler.postDelayed(this, 1000)
+            }
+        }, 10)
+    }
+
+    private fun getAmplitude(): Double
+    {
+        return if (mediaRecorder != null)
+        {
+            val maxAmplitude: Double = mediaRecorder!!.maxAmplitude.toDouble()
+            20 * log10(maxAmplitude / referenceAmplitude)
+        }
+        else
+        {
+            0.0
+        }
     }
 
     @ExperimentalTime
@@ -207,23 +352,26 @@ class MainActivity : AppCompatActivity()
                 }
             }
 
-            if (location !== null)
+            when
             {
-                latitude = location.latitude
-                longitude = location.longitude
-                actualTime = LocalDateTime.now()
-                launchExecutor()
-            }
-            else if (newLocation !== null)
-            {
-                latitude = newLocation!!.latitude
-                longitude = newLocation!!.longitude
-                actualTime = LocalDateTime.now()
-                launchExecutor()
-            }
-            else
-            {
-                Toast.makeText(this, "Failed on getting current location. Please try again later", Toast.LENGTH_SHORT).show()
+                location !== null    ->
+                {
+                    latitude = location.latitude
+                    longitude = location.longitude
+                    actualTime = LocalDateTime.now()
+                    launchExecutor()
+                }
+                newLocation !== null ->
+                {
+                    latitude = newLocation!!.latitude
+                    longitude = newLocation!!.longitude
+                    actualTime = LocalDateTime.now()
+                    launchExecutor()
+                }
+                else                 ->
+                {
+                    Toast.makeText(this, "Failed on getting current location. Please try again later", Toast.LENGTH_SHORT).show()
+                }
             }
 
         }.addOnFailureListener { Toast.makeText(this, "Failed on getting current location", Toast.LENGTH_SHORT).show() }
@@ -338,7 +486,7 @@ class MainActivity : AppCompatActivity()
         }
         catch (e: Exception)
         {
-            Log.e(TAG, "Error: $e")
+            Log.e(TAG, "Error on Json: $e")
         }
     }
 }
