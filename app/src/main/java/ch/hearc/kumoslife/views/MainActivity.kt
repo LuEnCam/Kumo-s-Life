@@ -19,8 +19,6 @@ import org.json.JSONObject
 import java.net.URL
 import ch.hearc.kumoslife.views.statistics.StatisticsActivity
 import androidx.work.WorkManager
-import ch.hearc.kumoslife.R
-import ch.hearc.kumoslife.SpriteView
 import ch.hearc.kumoslife.model.AppDatabase
 import ch.hearc.kumoslife.model.shop.Food
 import ch.hearc.kumoslife.model.statistics.Statistic
@@ -35,7 +33,8 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
 import java.util.concurrent.Executors
 import android.widget.Toast
-import ch.hearc.kumoslife.MinigameActivity
+import androidx.fragment.app.FragmentContainer
+import ch.hearc.kumoslife.*
 import java.util.concurrent.ExecutorService
 import android.media.MediaRecorder
 import android.os.*
@@ -43,11 +42,6 @@ import kotlin.math.log10
 import androidx.core.content.ContextCompat
 import java.io.File
 import java.io.IOException
-
-enum class KumosKolor
-{
-    WHITE, GREEN, GRAY
-}
 
 class MainActivity : AppCompatActivity()
 {
@@ -74,6 +68,8 @@ class MainActivity : AppCompatActivity()
     private val amplitudes: MutableList<Double> = MutableList(5) { 0.0 }
 
     private lateinit var bgVideoView: VideoView
+    private lateinit var kumofragment: KumoFragment
+
     private val buttonList: LinkedList<Button> = LinkedList<Button>()
     private var isLightOn = true
 
@@ -87,12 +83,9 @@ class MainActivity : AppCompatActivity()
 
         setContentView(R.layout.activity_main)
 
-        val eyesImageView = findViewById<ImageView>(R.id.eyes_imageView)
-        val mouthImageView = findViewById<ImageView>(R.id.mouth_imageView)
+        kumofragment = supportFragmentManager.findFragmentById(R.id.mainKumoFragment) as KumoFragment
 
-        // Adding the drawables (images + gifs) to the ImageViews with Glade
-        Glide.with(this).load(R.raw.eye).into(eyesImageView)
-        Glide.with(this).load(R.drawable.mouth_happy).into(mouthImageView)
+        kumofragment.changeKumosForm(KumosKolor.WHITE,KumosEyes.HAPPY,KumoMouth.HAPPY)
 
         // Background video initialization
         bgVideoView = findViewById(R.id.mainBgVideo)
@@ -151,8 +144,9 @@ class MainActivity : AppCompatActivity()
             {
                 if (data != null && data.extras != null)
                 {
-                    val returnedData = data.extras!!.get(MinigameActivity.MINIGAME_COLLECTED_ID)
+                    val returnedData = data.extras!!.get(MinigameActivity.MINIGAME_COLLECTED_ID) as Int
                     Toast.makeText(this, "Collected $returnedData unit(s) of FROOTS", Toast.LENGTH_SHORT).show()
+                    addMoney(returnedData)
                 }
             }
         }
@@ -308,6 +302,14 @@ class MainActivity : AppCompatActivity()
         mediaRecorder?.stop()
         mediaRecorder?.release()
         mediaRecorder = null
+    }
+
+
+    private fun addMoney(add: Int)
+    {
+        val mPrefs = getSharedPreferences("bag", 0)
+        val mEditor = mPrefs.edit()
+        mEditor.putInt("money", mPrefs.getInt("money", 0) + add).commit()
     }
 
     private fun getVoiceLevel()
@@ -495,18 +497,19 @@ class MainActivity : AppCompatActivity()
                 {
                     if (isDay) bgVideoView.setVideoPath(resPath + R.raw.day_fog)
                     else bgVideoView.setVideoPath(resPath + R.raw.night_fog)
-                    changeKumosColor(KumosKolor.GREEN)
+                    kumofragment.changeKumosForm(KumosKolor.WHITE,KumosEyes.SAD,KumoMouth.SAD)
                 }
                 "Mist" ->
                 {
                     if (isDay) bgVideoView.setVideoPath(resPath + R.raw.day_fog)
                     else bgVideoView.setVideoPath(resPath + R.raw.night_fog)
+                    kumofragment.changeKumosForm(KumosKolor.WHITE,KumosEyes.SAD,KumoMouth.SAD)
                 }
                 "Rain" ->
                 {
                     if (isDay) bgVideoView.setVideoPath(resPath + R.raw.rain)
                     else bgVideoView.setVideoPath(resPath + R.raw.rain_night)
-                    changeKumosColor(KumosKolor.WHITE)
+                    kumofragment.changeKumosForm(KumosKolor.WHITE,KumosEyes.SAD,KumoMouth.SAD)
                 }
                 "Snow" ->
                 {
@@ -517,6 +520,7 @@ class MainActivity : AppCompatActivity()
                 {
                     if (isDay) bgVideoView.setVideoPath(resPath + R.raw.day)
                     else bgVideoView.setVideoPath(resPath + R.raw.night)
+                    kumofragment.changeKumosForm(KumosKolor.WHITE,KumosEyes.HAPPY,KumoMouth.HAPPY)
                 }
             }
             bgVideoView.start()
@@ -527,11 +531,5 @@ class MainActivity : AppCompatActivity()
         {
             Log.e(TAG, "Error on Json: $e")
         }
-    }
-
-    private fun changeKumosColor(_value: KumosKolor)
-    {
-        val cloudSpriteView = findViewById<SpriteView>(R.id.kumo_spriteView)
-        cloudSpriteView.renderRow = _value.ordinal
     }
 }

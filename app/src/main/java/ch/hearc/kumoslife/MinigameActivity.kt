@@ -69,9 +69,23 @@ class MinigameActivity : AppCompatActivity(), SensorEventListener
 		Log.i("Minigame", "Minigame instance created")
 	}
 
+	override fun onResume()
+	{
+		super.onResume()
+
+		// set the delay to game so we get a high refresh rate and we can also use the
+		// sensor changed method to update the game state
+		sensorManager?.registerListener(this, gravitySensor, SensorManager.SENSOR_DELAY_GAME)
+		Log.i("Minigame", "Game has been resumed")
+	}
+
 	override fun onStop() {
 		super.onStop()
 		window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+		sensorManager?.unregisterListener(this, gravitySensor)
+		fruits.clear()
+
 		Log.i("Minigame", "Minigame instance stopped")
 	}
 
@@ -183,17 +197,7 @@ class MinigameActivity : AppCompatActivity(), SensorEventListener
 		scoreView.text = "score : $score"
 
 		val lifeView = findViewById<TextView>(R.id.minigame_life_textview)
-		lifeView.text ="${lives} : lives"
-	}
-
-	override fun onResume()
-	{
-		super.onResume()
-
-		// set the delay to game so we get a high refresh rate and we can also use the
-		// sensor changed method to update the game state
-		sensorManager?.registerListener(this, gravitySensor, SensorManager.SENSOR_DELAY_GAME)
-		Log.i("Minigame", "Game has been resumed")
+		lifeView.text = "${lives} : lives"
 	}
 
 	private var lastElapsedTime: Long = SystemClock.elapsedRealtime()
