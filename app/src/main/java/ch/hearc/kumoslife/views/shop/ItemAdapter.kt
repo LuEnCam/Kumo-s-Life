@@ -12,14 +12,23 @@ import kotlin.collections.ArrayList
 
 class ItemAdapter() : RecyclerView.Adapter<ItemAdapter.ViewHolder>()
 {
-    private var dataList: ArrayList<Item> = ArrayList()
+    private var dataList: List<Item> = ArrayList()
+    var onItemClick: ((Item) -> Unit)? = null
+    var getImageId: ((String) -> Int)? = null
 
-    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
+    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
     {
         val name: TextView = itemView.findViewById(R.id.nameItem)
         val prize: TextView = itemView.findViewById(R.id.prizeItem)
         val infos: TextView = itemView.findViewById(R.id.infosItem)
         val image: ImageView = itemView.findViewById(R.id.itemImageView)
+
+        init
+        {
+            itemView.setOnClickListener {
+                onItemClick?.invoke(dataList[adapterPosition])
+            }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder
@@ -36,7 +45,12 @@ class ItemAdapter() : RecyclerView.Adapter<ItemAdapter.ViewHolder>()
         holder.name.text = data.name
         holder.prize.text = data.prize.toString()
         holder.infos.text = data.info()
-        holder.image.setImageResource(data.id)
+        var id: Int? = getImageId?.invoke(data.name.lowercase())
+        if (id == null)
+        {
+            id = R.drawable.apple
+        }
+        holder.image.setImageResource(id)
     }
 
     override fun getItemCount(): Int
@@ -44,9 +58,9 @@ class ItemAdapter() : RecyclerView.Adapter<ItemAdapter.ViewHolder>()
         return dataList.size
     }
 
-    fun setData(dataList: ArrayList<Item>)
+
+    fun setData(dataList: List<Item>)
     {
         this.dataList = dataList
-        dataList.sortBy { element -> element.prize }
     }
 }

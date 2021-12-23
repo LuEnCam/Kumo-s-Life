@@ -22,7 +22,9 @@ import androidx.work.WorkManager
 import ch.hearc.kumoslife.R
 import ch.hearc.kumoslife.SpriteView
 import ch.hearc.kumoslife.model.AppDatabase
+import ch.hearc.kumoslife.model.shop.Food
 import ch.hearc.kumoslife.model.statistics.Statistic
+import ch.hearc.kumoslife.modelview.ShopViewModel
 import ch.hearc.kumoslife.modelview.StatisticViewModel
 import java.util.*
 import java.time.LocalDateTime
@@ -33,6 +35,7 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
 import java.util.concurrent.Executors
 import android.widget.Toast
+import ch.hearc.kumoslife.MinigameActivity
 import java.util.concurrent.ExecutorService
 import android.media.MediaRecorder
 import android.os.*
@@ -42,6 +45,11 @@ import java.io.File
 import java.io.IOException
 
 
+enum class KumosKolor
+{
+    WHITE, GREEN, GRAY
+}
+
 class MainActivity : AppCompatActivity()
 {
     private val resPath: String = "android.resource://ch.hearc.kumoslife/"
@@ -49,7 +57,6 @@ class MainActivity : AppCompatActivity()
     private val TAG: String = MainActivity::class.java.name
     private val LOCATION_PERMISSION_REQ_CODE = 1000
     private val REQUEST_PERM_ACCESS = 1
-    private val AUDIO_REQUEST_CODE = 200
     val API = "9d783bddf8b3eaa718e7d926a18ccb1c"    //API key used : allows 60 calls per minute
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -68,9 +75,12 @@ class MainActivity : AppCompatActivity()
 
     private lateinit var bgVideoView: VideoView
     private lateinit var viewModel: StatisticViewModel
+    private lateinit var shopViewModel: ShopViewModel
     private val buttonList: LinkedList<Button> = LinkedList<Button>()
     private val workManager = WorkManager.getInstance(application) // unused every time but needed to instantiate
     private var isLightOn = true
+
+    private val MINIGAME_REQUEST_CODE = 1
 
     @ExperimentalTime
     override fun onCreate(savedInstanceState: Bundle?)
@@ -82,14 +92,12 @@ class MainActivity : AppCompatActivity()
 
         setContentView(R.layout.activity_main)
 
-        //
-        val cloudSpriteView = findViewById<SpriteView>(R.id.kumo_spriteView)
         val eyesImageView = findViewById<ImageView>(R.id.eyes_imageView)
         val mouthImageView = findViewById<ImageView>(R.id.mouth_imageView)
 
         // Adding the drawables (images + gifs) to the ImageViews with Glade
         Glide.with(this).load(R.raw.eye).into(eyesImageView)
-        Glide.with(this).load(R.drawable.mouth_happy_white).into(mouthImageView)
+        Glide.with(this).load(R.drawable.mouth_happy).into(mouthImageView)
 
         // Background video initialization
         bgVideoView = findViewById(R.id.mainBgVideo)
@@ -99,65 +107,17 @@ class MainActivity : AppCompatActivity()
             mp.setVolume(0.0F, 0.0F)    // no need of volume
         }
 
-        // To statistics
-        val toStatisticsButton: Button = findViewById(R.id.mainToStatisticsButton)
-        toStatisticsButton.setOnClickListener {
-            intent = Intent(this, StatisticsActivity::class.java)
-            startActivity(intent)
-        }
-        buttonList.add(toStatisticsButton)
-
-        // To shop
-        val toShopButton: Button = findViewById(R.id.mainToShopButton)
-        toShopButton.setOnClickListener {
-            intent = Intent(this, ShopActivity::class.java)
-            startActivity(intent)
-        }
-        buttonList.add(toShopButton)
-
-        // Turn off/on light
-        findViewById<Button>(R.id.mainLightButton).setOnClickListener {
-            isLightOn = !isLightOn
-
-            val lightBg: TextView = findViewById(R.id.mainLightBg)
-            if (isLightOn)
-            {
-                for (button in buttonList)
-                {
-                    button.isEnabled = true
-                }
-                lightBg.visibility = View.INVISIBLE
-            }
-            else
-            {
-                for (button in buttonList)
-                {
-                    button.isEnabled = false
-                }
-                lightBg.visibility = View.VISIBLE
-            }
-        }
-
-        // Start Yelling
-        findViewById<Button>(R.id.mainYellButton).setOnClickListener {
-            if (mediaRecorder != null)
-            {
-                stopRecording()
-                findViewById<Button>(R.id.mainYellButton).text = "Yell"
-            }
-            else
-            {
-                getVoiceLevel()
-                findViewById<Button>(R.id.mainYellButton).text = "Stop"
-            }
-        }
+        createButtons()
 
         // Data base initialization
         AppDatabase.getInstance(applicationContext)
         viewModel = StatisticViewModel.getInstance(this)
 
+        shopViewModel = ShopViewModel.getInstance(this)
+        shopViewModel.resetFood()
+
         // Data base insertion of fresh new rows
-        // viewModel.initDataBase()
+        //viewModel.initDataBase()
 
         // Data base update every 15 mins
         // val statisticsWorker = PeriodicWorkRequestBuilder<StatisticsWorker>(15, TimeUnit.MINUTES).build()
@@ -193,6 +153,22 @@ class MainActivity : AppCompatActivity()
         }
         val weatherTimer = Timer()
         weatherTimer.scheduleAtFixedRate(weatherTimerTask, 0, 1000 * 60 * 1)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
+    {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == MINIGAME_REQUEST_CODE)
+        {
+            if (resultCode == RESULT_OK)
+            {
+                if (data != null && data.extras != null)
+                {
+                    val returnedData = data.extras!!.get(MinigameActivity.MINIGAME_COLLECTED_ID)
+                    Toast.makeText(this, "Collected $returnedData unit(s) of FROOTS", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 
     override fun onResume()
@@ -244,6 +220,72 @@ class MainActivity : AppCompatActivity()
         else
         {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        }
+    }
+
+    private fun createButtons()
+    {
+        // To statistics
+        val toStatisticsButton: Button = findViewById(R.id.mainToStatisticsButton)
+        toStatisticsButton.setOnClickListener {
+            intent = Intent(this, StatisticsActivity::class.java)
+            startActivity(intent)
+        }
+        buttonList.add(toStatisticsButton)
+
+        // To shop
+        val toShopButton: Button = findViewById(R.id.mainToShopButton)
+        toShopButton.setOnClickListener {
+            intent = Intent(this, ShopActivity::class.java)
+            startActivity(intent)
+        }
+        buttonList.add(toShopButton)
+
+        // ToGameButton
+        val toMinigameButton = findViewById<Button>(R.id.mainToMinigameButton)
+        toMinigameButton.setOnClickListener() {
+            intent = Intent(this, MinigameActivity::class.java)
+            startActivityForResult(intent, MINIGAME_REQUEST_CODE)
+        }
+        buttonList.add(toMinigameButton)
+
+        // Start Yelling
+        val yellButton = findViewById<Button>(R.id.mainYellButton)
+        yellButton.setOnClickListener {
+            if (mediaRecorder != null)
+            {
+                stopRecording()
+                yellButton.text = "Yell"
+            }
+            else
+            {
+                getVoiceLevel()
+                yellButton.text = "Stop"
+            }
+        }
+        buttonList.add(yellButton)
+
+        // Turn off/on light
+        findViewById<Button>(R.id.mainLightButton).setOnClickListener {
+            isLightOn = !isLightOn
+
+            val lightBg: TextView = findViewById(R.id.mainLightBg)
+            if (isLightOn)
+            {
+                for (button in buttonList)
+                {
+                    button.isEnabled = true
+                }
+                lightBg.visibility = View.INVISIBLE
+            }
+            else
+            {
+                for (button in buttonList)
+                {
+                    button.isEnabled = false
+                }
+                lightBg.visibility = View.VISIBLE
+            }
         }
     }
 
@@ -373,7 +415,6 @@ class MainActivity : AppCompatActivity()
                     Toast.makeText(this, "Failed on getting current location. Please try again later", Toast.LENGTH_SHORT).show()
                 }
             }
-
         }.addOnFailureListener { Toast.makeText(this, "Failed on getting current location", Toast.LENGTH_SHORT).show() }
     }
 
@@ -433,7 +474,6 @@ class MainActivity : AppCompatActivity()
             val weather = jsonObj.getJSONArray("weather").getJSONObject(0)
             val weatherID = weather.getString("main")
 
-
             /* TO CHECK :
             - Thunderstorm
             - Drizzle
@@ -459,17 +499,25 @@ class MainActivity : AppCompatActivity()
             val isDay = formatted.toInt() in 7..17 // We determine the day time between 7h and 16h
 
             //Depending on the API results, we will use the correct video
+            Log.i(TAG, "weatherID : $weatherID")
             when (weatherID)
             {
                 "Fog"  ->
                 {
-                    if (isDay) bgVideoView.setVideoPath(resPath + R.raw.fog)
-                    else bgVideoView.setVideoPath(resPath + R.raw.fog) //TODO : find fog at night video
+                    if (isDay) bgVideoView.setVideoPath(resPath + R.raw.day_fog)
+                    else bgVideoView.setVideoPath(resPath + R.raw.night_fog)
+                    changeKumosColor(KumosKolor.GREEN)
+                }
+                "Mist" ->
+                {
+                    if (isDay) bgVideoView.setVideoPath(resPath + R.raw.day_fog)
+                    else bgVideoView.setVideoPath(resPath + R.raw.night_fog)
                 }
                 "Rain" ->
                 {
                     if (isDay) bgVideoView.setVideoPath(resPath + R.raw.rain)
-                    else bgVideoView.setVideoPath(resPath + R.raw.rain) //TODO : find rain at night video
+                    else bgVideoView.setVideoPath(resPath + R.raw.rain_night)
+                    changeKumosColor(KumosKolor.WHITE)
                 }
                 "Snow" ->
                 {
@@ -483,10 +531,18 @@ class MainActivity : AppCompatActivity()
                 }
             }
             bgVideoView.start()
+            Log.i(TAG, "Starting bgVideoView with .start()")
+            Toast.makeText(this, weatherID, Toast.LENGTH_SHORT).show()
         }
         catch (e: Exception)
         {
             Log.e(TAG, "Error on Json: $e")
         }
+    }
+
+    private fun changeKumosColor(_value: KumosKolor)
+    {
+        val cloudSpriteView = findViewById<SpriteView>(R.id.kumo_spriteView)
+        cloudSpriteView.renderRow = _value.ordinal
     }
 }
