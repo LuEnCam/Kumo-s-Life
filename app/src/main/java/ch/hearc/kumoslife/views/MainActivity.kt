@@ -313,6 +313,14 @@ class MainActivity : AppCompatActivity()
         mediaRecorder = null
     }
 
+
+    private fun addMoney(add: Int)
+    {
+        val mPrefs = getSharedPreferences("bag", 0)
+        val mEditor = mPrefs.edit()
+        mEditor.putInt("money", mPrefs.getInt("money", 0) + add).commit()
+    }
+
     private fun getVoiceLevel()
     {
         startRecording()
