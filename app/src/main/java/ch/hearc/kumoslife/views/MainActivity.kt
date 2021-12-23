@@ -5,9 +5,6 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
@@ -22,8 +19,6 @@ import org.json.JSONObject
 import java.net.URL
 import ch.hearc.kumoslife.views.statistics.StatisticsActivity
 import androidx.work.WorkManager
-import ch.hearc.kumoslife.R
-import ch.hearc.kumoslife.SpriteView
 import ch.hearc.kumoslife.model.AppDatabase
 import ch.hearc.kumoslife.model.shop.Food
 import ch.hearc.kumoslife.model.statistics.Statistic
@@ -38,14 +33,23 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
 import java.util.concurrent.Executors
 import android.widget.Toast
-import ch.hearc.kumoslife.MinigameActivity
+import androidx.fragment.app.FragmentContainer
+import ch.hearc.kumoslife.*
 import java.util.concurrent.ExecutorService
+import android.media.MediaRecorder
+import android.os.*
+import kotlin.math.log10
+import androidx.core.content.ContextCompat
+import java.io.File
+import java.io.IOException
 
 class MainActivity : AppCompatActivity()
 {
     private val resPath: String = "android.resource://ch.hearc.kumoslife/"
+    private val recordFileName: String = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath + File.separator + "audiorecordtest.3gp"
     private val TAG: String = MainActivity::class.java.name
     private val LOCATION_PERMISSION_REQ_CODE = 1000
+    private val REQUEST_PERM_ACCESS = 1
     val API = "9d783bddf8b3eaa718e7d926a18ccb1c"    //API key used : allows 60 calls per minute
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -57,12 +61,21 @@ class MainActivity : AppCompatActivity()
     private val weatherExecutor: ExecutorService = Executors.newSingleThreadExecutor()
     private val weatherHandler = Handler(Looper.getMainLooper())
 
+    private var mediaRecorder: MediaRecorder? = null
+    private val referenceAmplitude = 0.0001
+    private var currentAmplitude = 0
+    private val amplitudes: MutableList<Double> = MutableList(5) { 0.0 }
+
     private lateinit var bgVideoView: VideoView
     private lateinit var viewModel: StatisticViewModel
     private lateinit var shopViewModel: ShopViewModel
+    private lateinit var kumofragment: KumoFragment
+
     private val buttonList: LinkedList<Button> = LinkedList<Button>()
     private val workManager = WorkManager.getInstance(application) // unused every time but needed to instantiate
     private var isLightOn = true
+
+    private val MINIGAME_REQUEST_CODE = 1
 
     @ExperimentalTime
     override fun onCreate(savedInstanceState: Bundle?)
@@ -74,14 +87,9 @@ class MainActivity : AppCompatActivity()
 
         setContentView(R.layout.activity_main)
 
-        //
-        val cloudSpriteView = findViewById<SpriteView>(R.id.kumo_spriteView)
-        val eyesImageView = findViewById<ImageView>(R.id.eyes_imageView)
-        val mouthImageView = findViewById<ImageView>(R.id.mouth_imageView)
+        kumofragment = supportFragmentManager.findFragmentById(R.id.mainKumoFragment) as KumoFragment
 
-        // Adding the drawables (images + gifs) to the ImageViews with Glade
-        Glide.with(this).load(R.drawable.eye).into(eyesImageView)
-        Glide.with(this).load(R.drawable.mouth_happy_white).into(mouthImageView)
+        kumofragment.changeKumosForm(KumosKolor.WHITE,KumosEyes.HAPPY,KumoMouth.HAPPY)
 
         // Background video initialization
         bgVideoView = findViewById(R.id.mainBgVideo)
@@ -91,58 +99,17 @@ class MainActivity : AppCompatActivity()
             mp.setVolume(0.0F, 0.0F)    // no need of volume
         }
 
-        // To statistics
-        val toStatisticsButton: Button = findViewById(R.id.mainToStatisticsButton)
-        toStatisticsButton.setOnClickListener() {
-            intent = Intent(this, StatisticsActivity::class.java)
-            startActivity(intent)
-        }
-        buttonList.add(toStatisticsButton)
-
-        // To shop
-        val toShopButton: Button = findViewById(R.id.mainToShopButton)
-        toShopButton.setOnClickListener() {
-            intent = Intent(this, ShopActivity::class.java)
-            startActivity(intent)
-        }
-        buttonList.add(toShopButton)
-
-        val toMinigameButton = findViewById<Button>(R.id.mainToMinigameButton)
-        toMinigameButton.setOnClickListener() {
-            intent = Intent(this, MinigameActivity::class.java)
-            startActivity(intent)
-        }
-
-        // Turn off/on light
-        findViewById<Button>(R.id.mainLightButton).setOnClickListener() {
-            isLightOn = !isLightOn
-
-            val lightBg: TextView = findViewById(R.id.mainLightBg)
-            if (isLightOn)
-            {
-                for (button in buttonList)
-                {
-                    button.isEnabled = true
-                }
-                lightBg.visibility = View.INVISIBLE
-            }
-            else
-            {
-                for (button in buttonList)
-                {
-                    button.isEnabled = false
-                }
-                lightBg.visibility = View.VISIBLE
-            }
-        }
+        createButtons()
 
         // Data base initialization
-        val db = AppDatabase.getInstance(applicationContext)
-
+        AppDatabase.getInstance(applicationContext)
         viewModel = StatisticViewModel.getInstance(this)
 
+        shopViewModel = ShopViewModel.getInstance(this)
+        shopViewModel.resetFood()
+
         // Data base insertion of fresh new rows
-        // viewModel.initDataBase()
+        //viewModel.initDataBase()
 
         // Data base update every 15 mins
         // val statisticsWorker = PeriodicWorkRequestBuilder<StatisticsWorker>(15, TimeUnit.MINUTES).build()
@@ -168,8 +135,6 @@ class MainActivity : AppCompatActivity()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         //Directly fetch localisation at app startup
-
-        shopDatabase(db)
         val weatherTimerTask: TimerTask = object : TimerTask()
         {
             override fun run()
@@ -180,17 +145,174 @@ class MainActivity : AppCompatActivity()
         }
         val weatherTimer = Timer()
         weatherTimer.scheduleAtFixedRate(weatherTimerTask, 0, 1000 * 60 * 1)
-
     }
 
-    private fun shopDatabase(db: AppDatabase)
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
     {
-
-        shopViewModel = ShopViewModel.getInstance(this)
-        shopViewModel.setDatabase(db)
-        shopViewModel.resetFood();
-
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == MINIGAME_REQUEST_CODE)
+        {
+            if (resultCode == RESULT_OK)
+            {
+                if (data != null && data.extras != null)
+                {
+                    val returnedData = data.extras!!.get(MinigameActivity.MINIGAME_COLLECTED_ID)
+                    Toast.makeText(this, "Collected $returnedData unit(s) of FROOTS", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
+
+    override fun onResume()
+    {
+        super.onResume()
+        bgVideoView.start()
+    }
+
+    override fun onPause()
+    {
+        super.onPause()
+        stopRecording()
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray)
+    {
+        var file = false
+        var mic = false
+
+        if (requestCode == REQUEST_PERM_ACCESS)
+        {
+            var i = 0
+            while (i < grantResults.size)
+            {
+                if (permissions[i].compareTo(Manifest.permission.WRITE_EXTERNAL_STORAGE) == 0 && grantResults[i] == PackageManager.PERMISSION_GRANTED)
+                {
+                    file = true
+                }
+                else if (permissions[i].compareTo(Manifest.permission.RECORD_AUDIO) == 0 && grantResults[i] == PackageManager.PERMISSION_GRANTED)
+                {
+                    mic = true
+                }
+                i++
+            }
+
+            if (mic && file)
+            {
+                // permission was granted
+                Log.i(TAG, "Both permissions has now been granted")
+                startRecording()
+            }
+            else
+            {
+                // permission denied
+                Log.i(TAG, "Both permissions were NOT granted.")
+            }
+            return
+        }
+        else
+        {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        }
+    }
+
+    private fun createButtons()
+    {
+        // To statistics
+        val toStatisticsButton: Button = findViewById(R.id.mainToStatisticsButton)
+        toStatisticsButton.setOnClickListener {
+            intent = Intent(this, StatisticsActivity::class.java)
+            startActivity(intent)
+        }
+        buttonList.add(toStatisticsButton)
+
+        // To shop
+        val toShopButton: Button = findViewById(R.id.mainToShopButton)
+        toShopButton.setOnClickListener {
+            intent = Intent(this, ShopActivity::class.java)
+            startActivity(intent)
+        }
+        buttonList.add(toShopButton)
+
+        // ToGameButton
+        val toMinigameButton = findViewById<Button>(R.id.mainToMinigameButton)
+        toMinigameButton.setOnClickListener() {
+            intent = Intent(this, MinigameActivity::class.java)
+            startActivityForResult(intent, MINIGAME_REQUEST_CODE)
+        }
+        buttonList.add(toMinigameButton)
+
+        // Start Yelling
+        val yellButton = findViewById<Button>(R.id.mainYellButton)
+        yellButton.setOnClickListener {
+            if (mediaRecorder != null)
+            {
+                stopRecording()
+                yellButton.text = "Yell"
+            }
+            else
+            {
+                getVoiceLevel()
+                yellButton.text = "Stop"
+            }
+        }
+        buttonList.add(yellButton)
+
+        // Turn off/on light
+        findViewById<Button>(R.id.mainLightButton).setOnClickListener {
+            isLightOn = !isLightOn
+
+            val lightBg: TextView = findViewById(R.id.mainLightBg)
+            if (isLightOn)
+            {
+                for (button in buttonList)
+                {
+                    button.isEnabled = true
+                }
+                lightBg.visibility = View.INVISIBLE
+            }
+            else
+            {
+                for (button in buttonList)
+                {
+                    button.isEnabled = false
+                }
+                lightBg.visibility = View.VISIBLE
+            }
+        }
+    }
+
+    private fun startRecording()
+    {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(applicationContext, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED)
+        {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO), REQUEST_PERM_ACCESS)
+        }
+        else
+        {
+            mediaRecorder = MediaRecorder()
+            mediaRecorder!!.setAudioSource(MediaRecorder.AudioSource.MIC)
+            mediaRecorder!!.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
+            mediaRecorder!!.setOutputFile(recordFileName)
+            mediaRecorder!!.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
+            try
+            {
+                mediaRecorder!!.prepare()
+            }
+            catch (e: IOException)
+            {
+                Log.e(TAG, "media recorder prepare() failed")
+            }
+            mediaRecorder!!.start()
+        }
+    }
+
+    private fun stopRecording()
+    {
+        mediaRecorder?.stop()
+        mediaRecorder?.release()
+        mediaRecorder = null
+    }
+
 
     private fun addMoney(add: Int)
     {
@@ -199,19 +321,47 @@ class MainActivity : AppCompatActivity()
         mEditor.putInt("money", mPrefs.getInt("money", 0) + add).commit()
     }
 
-    fun getImageRId(s: String): Int
+    private fun getVoiceLevel()
     {
-        return resources.getIdentifier(s, "drawable", packageName)
+        startRecording()
+        val handler = Handler()
+        handler.postDelayed(object : Runnable
+        {
+            override fun run()
+            {
+                val amplitude: Double = getAmplitude()
+                amplitudes[currentAmplitude] = amplitude
+
+                val max = amplitudes.maxOrNull() ?: 0.0
+                if (max > 170.0)
+                {
+                    Log.i(TAG, "Stop yelling at Kumo !")
+                    // TODO Change sprite here !
+                }
+
+                currentAmplitude += 1
+                if (currentAmplitude == amplitudes.size)
+                {
+                    currentAmplitude = 0
+                }
+
+                handler.postDelayed(this, 1000)
+            }
+        }, 10)
     }
 
-
-
-    override fun onResume()
+    private fun getAmplitude(): Double
     {
-        super.onResume()
-        bgVideoView.start()
+        return if (mediaRecorder != null)
+        {
+            val maxAmplitude: Double = mediaRecorder!!.maxAmplitude.toDouble()
+            20 * log10(maxAmplitude / referenceAmplitude)
+        }
+        else
+        {
+            0.0
+        }
     }
-
 
     @ExperimentalTime
     private fun getCurrentLocation()
@@ -244,25 +394,27 @@ class MainActivity : AppCompatActivity()
                 }
             }
 
-            if (location !== null)
+            when
             {
-                latitude = location.latitude
-                longitude = location.longitude
-                actualTime = LocalDateTime.now()
-                launchExecutor()
+                location !== null    ->
+                {
+                    latitude = location.latitude
+                    longitude = location.longitude
+                    actualTime = LocalDateTime.now()
+                    launchExecutor()
+                }
+                newLocation !== null ->
+                {
+                    latitude = newLocation!!.latitude
+                    longitude = newLocation!!.longitude
+                    actualTime = LocalDateTime.now()
+                    launchExecutor()
+                }
+                else                 ->
+                {
+                    Toast.makeText(this, "Failed on getting current location. Please try again later", Toast.LENGTH_SHORT).show()
+                }
             }
-            else if (newLocation !== null)
-            {
-                latitude = newLocation!!.latitude
-                longitude = newLocation!!.longitude
-                actualTime = LocalDateTime.now()
-                launchExecutor()
-            }
-            else
-            {
-                Toast.makeText(this, "Failed on getting current location. Please try again later", Toast.LENGTH_SHORT).show()
-            }
-
         }.addOnFailureListener { Toast.makeText(this, "Failed on getting current location", Toast.LENGTH_SHORT).show() }
     }
 
@@ -322,7 +474,6 @@ class MainActivity : AppCompatActivity()
             val weather = jsonObj.getJSONArray("weather").getJSONObject(0)
             val weatherID = weather.getString("main")
 
-
             /* TO CHECK :
             - Thunderstorm
             - Drizzle
@@ -348,17 +499,26 @@ class MainActivity : AppCompatActivity()
             val isDay = formatted.toInt() in 7..17 // We determine the day time between 7h and 16h
 
             //Depending on the API results, we will use the correct video
+            Log.i(TAG, "weatherID : $weatherID")
             when (weatherID)
             {
                 "Fog"  ->
                 {
-                    if (isDay) bgVideoView.setVideoPath(resPath + R.raw.fog)
-                    else bgVideoView.setVideoPath(resPath + R.raw.fog) //TODO : find fog at night video
+                    if (isDay) bgVideoView.setVideoPath(resPath + R.raw.day_fog)
+                    else bgVideoView.setVideoPath(resPath + R.raw.night_fog)
+                    kumofragment.changeKumosForm(KumosKolor.WHITE,KumosEyes.SAD,KumoMouth.SAD)
+                }
+                "Mist" ->
+                {
+                    if (isDay) bgVideoView.setVideoPath(resPath + R.raw.day_fog)
+                    else bgVideoView.setVideoPath(resPath + R.raw.night_fog)
+                    kumofragment.changeKumosForm(KumosKolor.WHITE,KumosEyes.SAD,KumoMouth.SAD)
                 }
                 "Rain" ->
                 {
                     if (isDay) bgVideoView.setVideoPath(resPath + R.raw.rain)
-                    else bgVideoView.setVideoPath(resPath + R.raw.rain) //TODO : find rain at night video
+                    else bgVideoView.setVideoPath(resPath + R.raw.rain_night)
+                    kumofragment.changeKumosForm(KumosKolor.WHITE,KumosEyes.SAD,KumoMouth.SAD)
                 }
                 "Snow" ->
                 {
@@ -369,13 +529,16 @@ class MainActivity : AppCompatActivity()
                 {
                     if (isDay) bgVideoView.setVideoPath(resPath + R.raw.day)
                     else bgVideoView.setVideoPath(resPath + R.raw.night)
+                    kumofragment.changeKumosForm(KumosKolor.WHITE,KumosEyes.HAPPY,KumoMouth.HAPPY)
                 }
             }
             bgVideoView.start()
+            Log.i(TAG, "Starting bgVideoView with .start()")
+            Toast.makeText(this, weatherID, Toast.LENGTH_SHORT).show()
         }
         catch (e: Exception)
         {
-            Log.e(TAG, "Error: $e")
+            Log.e(TAG, "Error on Json: $e")
         }
     }
 }

@@ -6,6 +6,8 @@
     android:layout_height="match_parent"
     tools:context=".KumoFragment">
 
+    s
+
     <ch.hearc.kumoslife.SpriteView
         android:id="@+id/kumo_spriteView"
         android:layout_width="0dp"
@@ -19,10 +21,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:renderRow="0"
-        app:rows="3"
-        app:src="@raw/spritekumo" />
-
-    s
+        app:rows="2"
+        app:src="@drawable/spritekumo" />
 
     <ImageView
         android:id="@+id/eyes_imageView"
@@ -32,7 +32,7 @@
         app:layout_constraintEnd_toEndOf="@+id/kumo_spriteView"
         app:layout_constraintStart_toStartOf="@+id/kumo_spriteView"
         app:layout_constraintTop_toTopOf="@+id/kumo_spriteView"
-        app:srcCompat="@drawable/eye" />
+        app:srcCompat="@raw/eye" />
 
     <ImageView
         android:id="@+id/mouth_imageView"
@@ -42,6 +42,6 @@
         app:layout_constraintEnd_toEndOf="@+id/kumo_spriteView"
         app:layout_constraintStart_toStartOf="@+id/kumo_spriteView"
         app:layout_constraintTop_toTopOf="@+id/kumo_spriteView"
-        app:srcCompat="@drawable/mouth_happy_white" />
+        app:srcCompat="@drawable/mouth_happy" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

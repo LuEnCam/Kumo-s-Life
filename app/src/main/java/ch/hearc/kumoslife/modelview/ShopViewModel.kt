@@ -11,8 +11,8 @@ import java.util.concurrent.Executors
 
 class ShopViewModel: ViewModel()
 {
-    private lateinit var db: AppDatabase
-    private lateinit var shopDao: ShopDao
+    private val db: AppDatabase = AppDatabase.getInstance()
+    private val shopDao: ShopDao = db.shopDao()
 
     // Static instance: singleton
     companion object
@@ -34,12 +34,6 @@ class ShopViewModel: ViewModel()
         }
     }
 
-    fun setDatabase(db: AppDatabase)
-    {
-        this.db = db
-        shopDao = db.shopDao()
-    }
-
     fun getAllFood(updateResults: (List<Item>) -> Unit)
     {
         Executors.newSingleThreadExecutor().execute {
@@ -47,14 +41,6 @@ class ShopViewModel: ViewModel()
         }
     }
 
-    fun deleteAllFood()
-    {
-        Executors.newSingleThreadExecutor().execute {
-            shopDao.deleteAll()
-        }
-    }
-
-    // Provisional, must be chek if database is already filled
     fun resetFood()
     {
         Executors.newSingleThreadExecutor().execute {
@@ -85,7 +71,6 @@ class ShopViewModel: ViewModel()
             shopDao.insert(Food(0, "Cake", 40, 30))
             shopDao.insert(Food(0, "Candy", 20, 10))
             shopDao.insert(Food(0, "Pie", 40, 30))
-
         }
     }
 

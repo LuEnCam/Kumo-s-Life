@@ -37,6 +37,7 @@ class ShopActivity : AppCompatActivity()
         recyclerView.adapter = adapter
 
         adapter.onItemClick = { item ->
+
             if (item is Food) {
                 if (removeMoney(item.prize))
                 {
@@ -100,11 +101,8 @@ class ShopActivity : AppCompatActivity()
             return false
         }
 
+    private fun getImageRId(s: String): Int
 
-
-
-
-    fun getImageRId(s: String): Int
     {
         return resources.getIdentifier(s, "drawable", packageName)
     }
