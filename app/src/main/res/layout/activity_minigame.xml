@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/rounded_layout_bg"
     android:backgroundTint="#664CAF50"
-    tools:context=".MinigameActivity">
+    tools:context=".views.MinigameActivity">
 
     <ImageView
         android:id="@+id/imageView"
