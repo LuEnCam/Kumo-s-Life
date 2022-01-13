@@ -26,7 +26,7 @@
             android:exported="false">
         </activity>
         <activity
-            android:name="MinigameActivity"
+            android:name=".views.MinigameActivity"
             android:exported="false">
         </activity>
         <activity
