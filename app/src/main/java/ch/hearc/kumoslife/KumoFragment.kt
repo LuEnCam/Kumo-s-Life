@@ -8,21 +8,19 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import com.bumptech.glide.Glide
 
-enum class KumosKolor {
-    WHITE,
-    GREEN,
-    GRAY
+enum class KumoColor
+{
+    WHITE, GREEN, GRAY
 }
 
-enum class KumosEyes {
-    ANGRY,
-    HAPPY,
-    SAD
+enum class KumosEyes
+{
+    ANGRY, HAPPY, SAD
 }
 
-enum class KumoMouth {
-    HAPPY,
-    SAD
+enum class KumoMouth
+{
+    HAPPY, SAD
 }
 
 class KumoFragment() : Fragment()
@@ -36,11 +34,11 @@ class KumoFragment() : Fragment()
         return inflater.inflate(R.layout.fragment_kumo, container, false)
     }
 
-    public fun changeKumosForm(_valueColor:KumosKolor, _valueEyes:KumosEyes, _valueMouth:KumoMouth)
+    public fun changeKumosShape(_valueColor: KumoColor, _valueEyes: KumosEyes, _valueMouth: KumoMouth)
     {
-        var cloudSpriteView = view?.findViewById<SpriteView>(R.id.kumo_spriteView)!!
-        var eyesImageView = view?.findViewById<ImageView>(R.id.eyes_imageView)!!
-        var mouthImageView = view?.findViewById<ImageView>(R.id.mouth_imageView)!!
+        val cloudSpriteView = view?.findViewById<SpriteView>(R.id.kumo_spriteView)!!
+        val eyesImageView = view?.findViewById<ImageView>(R.id.eyes_imageView)!!
+        val mouthImageView = view?.findViewById<ImageView>(R.id.mouth_imageView)!!
 
         cloudSpriteView.renderRow = _valueColor.ordinal
 
@@ -55,7 +53,7 @@ class KumoFragment() : Fragment()
                 Glide.with(this).load(R.raw.eye).into(eyesImageView)
             }
 
-            KumosEyes.SAD ->
+            KumosEyes.SAD   ->
             {
                 Glide.with(this).load(R.raw.eye_sad).into(eyesImageView)
             }

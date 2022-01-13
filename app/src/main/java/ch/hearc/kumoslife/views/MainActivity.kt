@@ -7,20 +7,16 @@ import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
 import android.widget.Button
-import android.widget.ImageView
 import android.view.View
 import android.view.Window
 import android.widget.*
 import androidx.core.app.ActivityCompat
-import com.bumptech.glide.Glide
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import org.json.JSONObject
 import java.net.URL
 import ch.hearc.kumoslife.views.statistics.StatisticsActivity
-import androidx.work.WorkManager
 import ch.hearc.kumoslife.model.AppDatabase
-import ch.hearc.kumoslife.model.shop.Food
 import ch.hearc.kumoslife.model.statistics.Statistic
 import ch.hearc.kumoslife.modelview.ShopViewModel
 import ch.hearc.kumoslife.modelview.StatisticViewModel
@@ -33,13 +29,11 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
 import java.util.concurrent.Executors
 import android.widget.Toast
-import androidx.fragment.app.FragmentContainer
 import ch.hearc.kumoslife.*
 import java.util.concurrent.ExecutorService
 import android.media.MediaRecorder
 import android.os.*
 import kotlin.math.log10
-import androidx.core.content.ContextCompat
 import java.io.File
 import java.io.IOException
 
@@ -51,7 +45,7 @@ class MainActivity : AppCompatActivity()
     private val LOCATION_PERMISSION_REQ_CODE = 1000
     private val REQUEST_PERM_ACCESS = 1
     private val MINIGAME_REQUEST_CODE = 1
-    val API = "9d783bddf8b3eaa718e7d926a18ccb1c"     //API key used : allows 60 calls per minute
+    val API = "9d783bddf8b3eaa718e7d926a18ccb1c"     // API key used : allows 60 calls per minute
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     var latitude: Double = 0.0
@@ -85,7 +79,7 @@ class MainActivity : AppCompatActivity()
 
         kumofragment = supportFragmentManager.findFragmentById(R.id.mainKumoFragment) as KumoFragment
 
-        kumofragment.changeKumosForm(KumosKolor.WHITE,KumosEyes.HAPPY,KumoMouth.HAPPY)
+        kumofragment.changeKumosShape(KumoColor.WHITE, KumosEyes.HAPPY, KumoMouth.HAPPY)
 
         // Background video initialization
         bgVideoView = findViewById(R.id.mainBgVideo)
@@ -194,7 +188,7 @@ class MainActivity : AppCompatActivity()
             else
             {
                 // permission denied
-                Log.i(TAG, "Both permissions were NOT granted.")
+                Log.i(TAG, "A permission was NOT granted")
             }
             return
         }
@@ -224,7 +218,7 @@ class MainActivity : AppCompatActivity()
         }
         buttonList.add(toShopButton)
 
-        // ToGameButton
+        // To Game
         val toMinigameButton = findViewById<Button>(R.id.mainToMinigameButton)
         toMinigameButton.setOnClickListener() {
             intent = Intent(this, MinigameActivity::class.java)
@@ -232,7 +226,7 @@ class MainActivity : AppCompatActivity()
         }
         buttonList.add(toMinigameButton)
 
-        // Start Yelling
+        // Start/Stop Yelling
         val yellButton = findViewById<Button>(R.id.mainYellButton)
         yellButton.setOnClickListener {
             if (mediaRecorder != null)
@@ -268,6 +262,8 @@ class MainActivity : AppCompatActivity()
                     button.isEnabled = false
                 }
                 lightBg.visibility = View.VISIBLE
+
+                // TODO Change Kumo's eyes
             }
         }
     }
@@ -307,9 +303,9 @@ class MainActivity : AppCompatActivity()
 
     private fun addMoney(add: Int)
     {
-        val mPrefs = getSharedPreferences("bag", 0)
-        val mEditor = mPrefs.edit()
-        mEditor.putInt("money", mPrefs.getInt("money", 0) + add).commit()
+        val preferences = getSharedPreferences("bag", 0)
+        val editor = preferences.edit()
+        editor.putInt("money", preferences.getInt("money", 0) + add).commit()
     }
 
     private fun getVoiceLevel()
@@ -324,8 +320,9 @@ class MainActivity : AppCompatActivity()
                 amplitudes[currentAmplitude] = amplitude
 
                 val max = amplitudes.maxOrNull() ?: 0.0
-                if (max > 170.0)
+                if (max > 150.0)
                 {
+                    Toast.makeText(applicationContext, "Stop yelling at Kumo, it's loud enough !", Toast.LENGTH_SHORT).show()
                     Log.i(TAG, "Stop yelling at Kumo !")
                     // TODO Change sprite here !
                 }
@@ -379,7 +376,7 @@ class MainActivity : AppCompatActivity()
                         }
                         else
                         {
-                            Toast.makeText(null, "Failed on getting current location", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(applicationContext, "Failed on getting current location", Toast.LENGTH_SHORT).show()
                         }
                     }
                 }
@@ -437,7 +434,7 @@ class MainActivity : AppCompatActivity()
     {
         try
         {
-            /* Extracting JSON returns from the API */
+            // Extracting JSON returned from the API
             val jsonObj = JSONObject(result)
 
             /*
@@ -483,13 +480,13 @@ class MainActivity : AppCompatActivity()
             - Clouds
             */
 
-            //Getting the hours of the actual time to change the background
+            // Getting the hours of the actual time to change the background
             val formatter = DateTimeFormatter.ofPattern("HH")
             val formatted = actualTime.format(formatter)
 
             val isDay = formatted.toInt() in 7..17 // We determine the day time between 7h and 16h
 
-            //Depending on the API results, we will use the correct video
+            // Depending on the API results, we will use the correct video
             Log.i(TAG, "weatherID : $weatherID")
             when (weatherID)
             {
@@ -497,19 +494,19 @@ class MainActivity : AppCompatActivity()
                 {
                     if (isDay) bgVideoView.setVideoPath(resPath + R.raw.day_fog)
                     else bgVideoView.setVideoPath(resPath + R.raw.night_fog)
-                    kumofragment.changeKumosForm(KumosKolor.WHITE,KumosEyes.SAD,KumoMouth.SAD)
+                    kumofragment.changeKumosShape(KumoColor.WHITE, KumosEyes.SAD, KumoMouth.SAD)
                 }
                 "Mist" ->
                 {
                     if (isDay) bgVideoView.setVideoPath(resPath + R.raw.day_fog)
                     else bgVideoView.setVideoPath(resPath + R.raw.night_fog)
-                    kumofragment.changeKumosForm(KumosKolor.WHITE,KumosEyes.SAD,KumoMouth.SAD)
+                    kumofragment.changeKumosShape(KumoColor.WHITE, KumosEyes.SAD, KumoMouth.SAD)
                 }
                 "Rain" ->
                 {
                     if (isDay) bgVideoView.setVideoPath(resPath + R.raw.rain)
                     else bgVideoView.setVideoPath(resPath + R.raw.rain_night)
-                    kumofragment.changeKumosForm(KumosKolor.WHITE,KumosEyes.SAD,KumoMouth.SAD)
+                    kumofragment.changeKumosShape(KumoColor.WHITE, KumosEyes.SAD, KumoMouth.SAD)
                 }
                 "Snow" ->
                 {
@@ -520,7 +517,7 @@ class MainActivity : AppCompatActivity()
                 {
                     if (isDay) bgVideoView.setVideoPath(resPath + R.raw.day)
                     else bgVideoView.setVideoPath(resPath + R.raw.night)
-                    kumofragment.changeKumosForm(KumosKolor.WHITE,KumosEyes.HAPPY,KumoMouth.HAPPY)
+                    kumofragment.changeKumosShape(KumoColor.WHITE, KumosEyes.HAPPY, KumoMouth.HAPPY)
                 }
             }
             bgVideoView.start()

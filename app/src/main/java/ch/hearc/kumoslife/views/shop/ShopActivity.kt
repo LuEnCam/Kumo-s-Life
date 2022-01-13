@@ -45,10 +45,7 @@ class ShopActivity : AppCompatActivity()
                     val stat = statisticViewModel.getStatisticByName("Hunger")
                     if (stat != null)
                     {
-                        //val prec: String = stat.name + stat.value
                         statisticViewModel.decrease(item.nutritiveValue.toDouble(), stat)
-
-
                         Toast.makeText(applicationContext, "Miam !\nKumo a encroe faim de " + stat.value, Toast.LENGTH_SHORT).show()
                     }
                 }
@@ -66,19 +63,18 @@ class ShopActivity : AppCompatActivity()
             finish()
         }
 
-        val textView: TextView = findViewById<TextView>(R.id.money)
+        val textView: TextView = findViewById(R.id.money)
         textView.text = getMoney().toString()
     }
 
-
     private fun setMoney(money: Int)
     {
-        val mPrefs = getSharedPreferences("bag", 0)
-        val mEditor = mPrefs.edit()
-        mEditor.putInt("money", money).commit()
-        val textView: TextView = findViewById<TextView>(R.id.money)
-        textView.text = getMoney().toString()
+        val preferences = getSharedPreferences("bag", 0)
+        val editor = preferences.edit()
+        editor.putInt("money", money).commit()
 
+        val textView: TextView = findViewById(R.id.money)
+        textView.text = getMoney().toString()
     }
 
     private fun getMoney(): Int
@@ -107,5 +103,4 @@ class ShopActivity : AppCompatActivity()
     {
         adapter.setData(list)
     }
-
 }
