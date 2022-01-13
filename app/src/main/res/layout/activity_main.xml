@@ -86,4 +86,124 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="invisible" />
+
+    <ImageView
+        android:id="@+id/mainHungerImage"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="128dp"
+        android:visibility="invisible"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/mainToStatisticsButton"
+        app:srcCompat="@drawable/think"
+        tools:visibility="visible" />
+
+    <ImageView
+        android:id="@+id/mainActivityImage"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:layout_marginTop="128dp"
+        android:layout_marginEnd="24dp"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/mainToShopButton"
+        app:srcCompat="@drawable/think"
+        tools:visibility="visible" />
+
+    <ImageView
+        android:id="@+id/mainSleepImage"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:layout_marginStart="64dp"
+        android:layout_marginBottom="160dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/think"
+        tools:visibility="visible" />
+
+    <ImageView
+        android:id="@+id/mainSicknessImage"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:layout_marginEnd="64dp"
+        android:layout_marginBottom="160dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:srcCompat="@drawable/think"
+        tools:visibility="visible" />
+
+    <ImageView
+        android:id="@+id/mainThirstImage"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:layout_marginTop="48dp"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toStartOf="@+id/mainActivityImage"
+        app:layout_constraintStart_toEndOf="@+id/mainHungerImage"
+        app:layout_constraintTop_toBottomOf="@+id/mainLightButton"
+        app:srcCompat="@drawable/think"
+        tools:visibility="visible" />
+
+    <ImageView
+        android:id="@+id/mainHungerLogo"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/mainHungerImage"
+        app:layout_constraintEnd_toEndOf="@+id/mainHungerImage"
+        app:layout_constraintStart_toStartOf="@+id/mainHungerImage"
+        app:layout_constraintTop_toTopOf="@+id/mainHungerImage"
+        app:srcCompat="@drawable/hunger"
+        tools:visibility="visible" />
+
+    <ImageView
+        android:id="@+id/mainActivityLogo"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/mainActivityImage"
+        app:layout_constraintEnd_toEndOf="@+id/mainActivityImage"
+        app:layout_constraintStart_toStartOf="@+id/mainActivityImage"
+        app:layout_constraintTop_toTopOf="@+id/mainActivityImage"
+        app:srcCompat="@drawable/activity"
+        tools:visibility="visible" />
+
+    <ImageView
+        android:id="@+id/mainThirstLogo"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/mainThirstImage"
+        app:layout_constraintEnd_toEndOf="@+id/mainThirstImage"
+        app:layout_constraintStart_toStartOf="@+id/mainThirstImage"
+        app:layout_constraintTop_toTopOf="@+id/mainThirstImage"
+        app:srcCompat="@drawable/thirst"
+        tools:visibility="visible" />
+
+    <ImageView
+        android:id="@+id/mainSleepLogo"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/mainSleepImage"
+        app:layout_constraintEnd_toEndOf="@+id/mainSleepImage"
+        app:layout_constraintStart_toStartOf="@+id/mainSleepImage"
+        app:layout_constraintTop_toTopOf="@+id/mainSleepImage"
+        app:srcCompat="@drawable/sleep"
+        tools:visibility="visible" />
+
+    <ImageView
+        android:id="@+id/mainSicknessLogo"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/mainSicknessImage"
+        app:layout_constraintEnd_toEndOf="@+id/mainSicknessImage"
+        app:layout_constraintStart_toStartOf="@+id/mainSicknessImage"
+        app:layout_constraintTop_toTopOf="@+id/mainSicknessImage"
+        app:srcCompat="@drawable/sickness"
+        tools:visibility="visible" />
 </androidx.constraintlayout.widget.ConstraintLayout>

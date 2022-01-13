@@ -36,6 +36,7 @@ import android.os.*
 import kotlin.math.log10
 import java.io.File
 import java.io.IOException
+import androidx.lifecycle.Observer
 
 class MainActivity : AppCompatActivity()
 {
@@ -63,6 +64,8 @@ class MainActivity : AppCompatActivity()
 
     private lateinit var bgVideoView: VideoView
     private lateinit var kumofragment: KumoFragment
+
+    private lateinit var statisticViewModel: StatisticViewModel
 
     private val buttonList: LinkedList<Button> = LinkedList<Button>()
     private var isLightOn = true
@@ -93,40 +96,19 @@ class MainActivity : AppCompatActivity()
 
         // Data base initialisation
         AppDatabase.getInstance(this)
-        StatisticViewModel.getInstance(this)
+        statisticViewModel = StatisticViewModel.getInstance(this)
         ShopViewModel.getInstance(this)
 
-        // Update light value
-        val lightTimerTask: TimerTask = object : TimerTask()
-        {
-            override fun run()
-            {
-                val statisticViewModel = StatisticViewModel.getInstance()
-                val stat: Statistic? = statisticViewModel.getStatisticByName("Sleep")
-                if (stat != null && !isLightOn)
-                {
-                    Log.i(TAG, "Decrease sleep value")
-                    statisticViewModel.decrease(1.0, stat)
-                }
-            }
-        }
-        val timer = Timer()
-        timer.scheduleAtFixedRate(lightTimerTask, 0, 10000)
+        // Data base update every 15 mins
+        // val statisticsWorker = PeriodicWorkRequestBuilder<StatisticsWorker>(15, TimeUnit.MINUTES).build()
+        // workManager.enqueueUniquePeriodicWork("statisticsWorker", ExistingPeriodicWorkPolicy.KEEP, statisticsWorker)
 
         // Luca.C - 28.10.2021 : initialize fused location client
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
-        //Directly fetch localisation at app startup
-        val weatherTimerTask: TimerTask = object : TimerTask()
-        {
-            override fun run()
-            {
-                Log.i(TAG, "Launching weather & location task")
-                getCurrentLocation()
-            }
-        }
-        val weatherTimer = Timer()
-        weatherTimer.scheduleAtFixedRate(weatherTimerTask, 0, 1000 * 60 * 1)
+        updateLightValues()
+        updateFeelings()
+        updateBackground()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
@@ -196,6 +178,62 @@ class MainActivity : AppCompatActivity()
         {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
+    }
+
+    private fun updateFeelings()
+    {
+        statisticViewModel.getAllStatistics().observe(this, Observer { statistics ->
+            Log.i(TAG, "Update feelings")
+            for (stat in statistics)
+            {
+                val feelingBubble = findViewById<ImageView>(resources.getIdentifier("main${stat.name}Image", "id", packageName))
+                val feelingImage = findViewById<ImageView>(resources.getIdentifier("main${stat.name}Logo", "id", packageName))
+                if (stat.value >= 90)
+                {
+                    feelingBubble.visibility = View.VISIBLE
+                    feelingImage.visibility = View.VISIBLE
+                }
+                else
+                {
+                    feelingBubble.visibility = View.INVISIBLE
+                    feelingImage.visibility = View.INVISIBLE
+                }
+            }
+        })
+    }
+
+    @ExperimentalTime
+    private fun updateBackground()
+    {
+        //Directly fetch localisation at app startup
+        val weatherTimerTask: TimerTask = object : TimerTask()
+        {
+            override fun run()
+            {
+                Log.i(TAG, "Launching weather & location task")
+                getCurrentLocation()
+            }
+        }
+        val weatherTimer = Timer()
+        weatherTimer.scheduleAtFixedRate(weatherTimerTask, 0, 1000 * 60 * 1)
+    }
+
+    private fun updateLightValues()
+    {
+        val lightTimerTask: TimerTask = object : TimerTask()
+        {
+            override fun run()
+            {
+                val stat: Statistic? = statisticViewModel.getStatisticByName("Sleep")
+                if (stat != null && !isLightOn)
+                {
+                    Log.i(TAG, "Decrease sleep value")
+                    statisticViewModel.decrease(1.0, stat)
+                }
+            }
+        }
+        val timer = Timer()
+        timer.scheduleAtFixedRate(lightTimerTask, 0, 10000)
     }
 
     private fun createButtons()

@@ -21,7 +21,7 @@ import ch.hearc.kumoslife.modelview.StatisticViewModel
 import java.util.concurrent.TimeUnit
 
 
-@Database(entities = [Statistic::class, Food::class], version = 4)
+@Database(entities = [Statistic::class, Food::class], version = 5)
 abstract class AppDatabase : RoomDatabase()
 {
     // Static instance: singleton
