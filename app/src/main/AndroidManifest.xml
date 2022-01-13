@@ -3,8 +3,8 @@
     package="ch.hearc.kumoslife">
 
     <!-- Luca.C - 28.10.2021 : Needed to fetch device position and call OpenWeatherAPI -->
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> <!-- un peu plus vague - basé sur le GPS-->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> <!--précis basé sur le réseau ! mais nécessite quand même coarse -->
     <uses-permission android:name="android.permission.INTERNET" />
 
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
