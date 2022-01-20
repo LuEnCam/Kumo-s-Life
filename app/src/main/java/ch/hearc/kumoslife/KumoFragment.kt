@@ -13,7 +13,7 @@ import com.bumptech.glide.Glide
 
 enum class KumoColor
 {
-    WHITE, GREEN, GRAY
+    WHITE, GRAY, GREEN
 }
 
 enum class KumosEyes
