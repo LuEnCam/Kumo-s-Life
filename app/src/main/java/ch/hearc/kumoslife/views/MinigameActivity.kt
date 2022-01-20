@@ -161,7 +161,7 @@ class MinigameActivity : AppCompatActivity(), SensorEventListener
         {
             paused = true
 
-            val collectedFood = collected / 10
+            val collectedFood = collected / 5
 
             Log.i(TAG, "The game has been lost and $collectedFood fruits have been gathered")
 
