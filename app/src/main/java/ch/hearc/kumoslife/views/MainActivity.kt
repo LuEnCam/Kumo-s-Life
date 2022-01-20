@@ -4,6 +4,7 @@ import android.content.Intent
 import android.Manifest
 import android.content.pm.PackageManager
 import android.location.Location
+import android.media.AudioManager
 import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
 import android.widget.Button
@@ -83,6 +84,7 @@ class MainActivity : AppCompatActivity()
         // Background video initialization
         bgVideoView = findViewById(R.id.mainBgVideo)
         bgVideoView.setVideoPath(resPath + R.raw.day)
+        bgVideoView.setAudioFocusRequest(AudioManager.AUDIOFOCUS_NONE)
         bgVideoView.setOnPreparedListener { mp ->
             mp.isLooping = true
             mp.setVolume(0.0F, 0.0F)    // no need of volume
@@ -117,7 +119,7 @@ class MainActivity : AppCompatActivity()
                 if (data != null && data.extras != null)
                 {
                     val returnedData = data.extras!!.get(MinigameActivity.MINIGAME_COLLECTED_ID) as Int
-                    Toast.makeText(this, "Collected $returnedData unit(s) of FROOTS", Toast.LENGTH_SHORT).show()
+                    //Toast.makeText(this, "Collected $returnedData unit(s) of FROOTS", Toast.LENGTH_SHORT).show()
                     addMoney(returnedData)
                 }
             }
