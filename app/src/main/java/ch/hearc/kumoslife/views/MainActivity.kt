@@ -71,6 +71,8 @@ class MainActivity : AppCompatActivity()
     private val buttonList: LinkedList<Button> = LinkedList<Button>()
     private var isLightOn = true
 
+    private var eyes = KumosEyes.HAPPY
+
     @ExperimentalTime
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -100,6 +102,7 @@ class MainActivity : AppCompatActivity()
         // Luca.C - 28.10.2021 : initialize fused location client
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
+        // Init kumo fragment
         kumofragment = supportFragmentManager.findFragmentById(R.id.mainKumoFragment) as KumoFragment
         kumofragment.init()
         kumofragment.changeKumosShape(KumoColor.WHITE, KumosEyes.HAPPY, KumoMouth.HAPPY)
@@ -291,6 +294,8 @@ class MainActivity : AppCompatActivity()
                     button.isEnabled = true
                 }
                 lightBg.visibility = View.INVISIBLE
+
+                kumofragment.changeKumosShape(kumofragment.getColor(), eyes, kumofragment.getMouth())
             }
             else
             {
@@ -299,6 +304,8 @@ class MainActivity : AppCompatActivity()
                     button.isEnabled = false
                 }
                 lightBg.visibility = View.VISIBLE
+                
+                kumofragment.changeKumosShape(kumofragment.getColor(), KumosEyes.SLEEPING, kumofragment.getMouth())
             }
         }
     }
@@ -553,6 +560,8 @@ class MainActivity : AppCompatActivity()
                     kumofragment.changeKumosShape(KumoColor.WHITE, KumosEyes.HAPPY, KumoMouth.HAPPY)
                 }
             }
+            eyes = kumofragment.getEyes()
+
             bgVideoView.start()
             Log.i(TAG, "Starting bgVideoView with .start()")
             Toast.makeText(this, weatherID, Toast.LENGTH_SHORT).show()

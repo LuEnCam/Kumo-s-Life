@@ -48,6 +48,21 @@ class KumoFragment : Fragment()
         mouthImageView = view?.findViewById(R.id.mouth_imageView)!!
     }
 
+    fun getEyes(): KumosEyes
+    {
+        return eyes
+    }
+
+    fun getColor(): KumoColor
+    {
+        return color
+    }
+
+    fun getMouth(): KumoMouth
+    {
+        return mouth
+    }
+
     fun changeKumosShape(_valueColor: KumoColor, _valueEyes: KumosEyes, _valueMouth: KumoMouth)
     {
         eyes = _valueEyes
