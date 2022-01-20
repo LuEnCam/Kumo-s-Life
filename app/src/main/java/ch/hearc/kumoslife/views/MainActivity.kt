@@ -217,7 +217,7 @@ class MainActivity : AppCompatActivity()
             }
         }
         val weatherTimer = Timer()
-        weatherTimer.scheduleAtFixedRate(weatherTimerTask, 0, 1000 * 60 * 10)
+        weatherTimer.scheduleAtFixedRate(weatherTimerTask, 0, 1000 * 60 * 10) //Each 10 minutes.
     }
 
     private fun updateLightValues()
