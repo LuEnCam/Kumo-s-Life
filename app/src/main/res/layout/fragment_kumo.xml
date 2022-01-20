@@ -21,7 +21,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:renderRow="0"
-        app:rows="2"
+        app:rows="3"
         app:src="@drawable/spritekumo" />
 
     <ImageView

@@ -217,7 +217,7 @@ class MainActivity : AppCompatActivity()
             }
         }
         val weatherTimer = Timer()
-        weatherTimer.scheduleAtFixedRate(weatherTimerTask, 0, 1000 * 60 * 1)
+        weatherTimer.scheduleAtFixedRate(weatherTimerTask, 0, 1000 * 60 * 10) //Each 10 minutes.
     }
 
     private fun updateLightValues()
@@ -564,7 +564,7 @@ class MainActivity : AppCompatActivity()
 
             bgVideoView.start()
             Log.i(TAG, "Starting bgVideoView with .start()")
-            Toast.makeText(this, weatherID, Toast.LENGTH_SHORT).show()
+            //Toast.makeText(this, weatherID, Toast.LENGTH_SHORT).show()
         }
         catch (e: Exception)
         {
