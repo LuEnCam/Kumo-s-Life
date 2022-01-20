@@ -163,11 +163,11 @@ class MinigameActivity : AppCompatActivity(), SensorEventListener
 
             val collectedFood = collected / 10
 
-            Log.i(TAG, "The game has been lost and $collectedFood units of food have been gathered")
+            Log.i(TAG, "The game has been lost and $collectedFood fruits have been gathered")
 
             // once we lost open a dialog to alert the user and then return the amount of fruits
             // collected to the calling activity
-            AlertDialog.Builder(this).setTitle("You lost").setMessage("You managed to collect $collectedFood unit(s) of food").setPositiveButton("Press F") { _, _ ->
+            AlertDialog.Builder(this).setTitle("You lost").setMessage("You managed to collect $collectedFood coins").setPositiveButton("Sad Times") { _, _ ->
                 Log.i(TAG, "User pressed F")
 
                 val result = Intent()
