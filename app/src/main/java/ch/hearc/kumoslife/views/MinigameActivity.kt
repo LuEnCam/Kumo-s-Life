@@ -168,12 +168,12 @@ class MinigameActivity : AppCompatActivity(), SensorEventListener
             // once we lost open a dialog to alert the user and then return the amount of fruits
             // collected to the calling activity
             AlertDialog.Builder(this).setTitle("You lost").setMessage("You managed to collect $collectedFood coins").setPositiveButton("Sad Times") { _, _ ->
-                Log.i(TAG, "User pressed F")
+                //Log.i(TAG, "User pressed F")
 
                 val result = Intent()
                 result.putExtra(MINIGAME_COLLECTED_ID, collectedFood) // we collect 1 food for every 10 caught in game
-                setResult(Activity.RESULT_OK, result)
-                finish()
+                this@MinigameActivity.setResult(Activity.RESULT_OK, result)
+                this@MinigameActivity.finish()
             }.show()
         }
     }
