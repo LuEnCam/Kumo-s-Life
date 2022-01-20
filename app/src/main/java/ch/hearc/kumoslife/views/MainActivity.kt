@@ -80,10 +80,6 @@ class MainActivity : AppCompatActivity()
 
         setContentView(R.layout.activity_main)
 
-        kumofragment = supportFragmentManager.findFragmentById(R.id.mainKumoFragment) as KumoFragment
-
-        kumofragment.changeKumosShape(KumoColor.WHITE, KumosEyes.HAPPY, KumoMouth.HAPPY)
-
         // Background video initialization
         bgVideoView = findViewById(R.id.mainBgVideo)
         bgVideoView.setVideoPath(resPath + R.raw.day)
@@ -99,12 +95,12 @@ class MainActivity : AppCompatActivity()
         statisticViewModel = StatisticViewModel.getInstance(this)
         ShopViewModel.getInstance(this)
 
-        // Data base update every 15 mins
-        // val statisticsWorker = PeriodicWorkRequestBuilder<StatisticsWorker>(15, TimeUnit.MINUTES).build()
-        // workManager.enqueueUniquePeriodicWork("statisticsWorker", ExistingPeriodicWorkPolicy.KEEP, statisticsWorker)
-
         // Luca.C - 28.10.2021 : initialize fused location client
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        kumofragment = supportFragmentManager.findFragmentById(R.id.mainKumoFragment) as KumoFragment
+        kumofragment.init()
+        kumofragment.changeKumosShape(KumoColor.WHITE, KumosEyes.HAPPY, KumoMouth.HAPPY)
 
         updateLightValues()
         updateFeelings()
@@ -159,6 +155,7 @@ class MainActivity : AppCompatActivity()
                     mic = true
                 }
                 i++
+                Log.i(TAG, "Not enough permissions")
             }
 
             if (mic && file)
@@ -300,8 +297,6 @@ class MainActivity : AppCompatActivity()
                     button.isEnabled = false
                 }
                 lightBg.visibility = View.VISIBLE
-
-                // TODO Change Kumo's eyes
             }
         }
     }
@@ -338,7 +333,6 @@ class MainActivity : AppCompatActivity()
         mediaRecorder = null
     }
 
-
     private fun addMoney(add: Int)
     {
         val preferences = getSharedPreferences("bag", 0)
@@ -362,7 +356,6 @@ class MainActivity : AppCompatActivity()
                 {
                     Toast.makeText(applicationContext, "Stop yelling at Kumo, it's loud enough !", Toast.LENGTH_SHORT).show()
                     Log.i(TAG, "Stop yelling at Kumo !")
-                    // TODO Change sprite here !
                 }
 
                 currentAmplitude += 1

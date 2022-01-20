@@ -53,10 +53,10 @@ class StatisticViewModel : ViewModel()
         Executors.newSingleThreadExecutor().execute {
             Log.i(TAG, "All statistics has been deleted and reinserted in data base")
             statisticDao.deleteAll()
-            statisticDao.insert(Statistic(0, "Hunger", 35.0, 8.0))
-            statisticDao.insert(Statistic(0, "Activity", 10.0, 12.5))
-            statisticDao.insert(Statistic(0, "Sleep", 15.0, 2.3))
-            statisticDao.insert(Statistic(0, "Sickness", 26.0, 1.0))
+            statisticDao.insert(Statistic(0, "Hunger", 35.0, 100.0))
+            statisticDao.insert(Statistic(0, "Activity", 10.0, 100.0))
+            statisticDao.insert(Statistic(0, "Sleep", 15.0, 100.0))
+            statisticDao.insert(Statistic(0, "Sickness", 26.0, 100.0))
             statisticsLiveData.postValue(statisticDao.getAll() as ArrayList<Statistic>)
         }
     }

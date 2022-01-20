@@ -1,6 +1,9 @@
 package ch.hearc.kumoslife
 
+import android.content.res.Resources
+import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -15,7 +18,7 @@ enum class KumoColor
 
 enum class KumosEyes
 {
-    ANGRY, HAPPY, SAD
+    ANGRY, HAPPY, SAD, SLEEPING
 }
 
 enum class KumoMouth
@@ -23,39 +26,55 @@ enum class KumoMouth
     HAPPY, SAD
 }
 
-class KumoFragment() : Fragment()
+class KumoFragment : Fragment()
 {
-    //private lateinit var cloudSpriteView : SpriteView
-    //private lateinit var eyesImageView : ImageView
-    //private lateinit var mouthImageView : ImageView
+    private lateinit var color: KumoColor
+    private lateinit var mouth: KumoMouth
+    private lateinit var eyes: KumosEyes
+
+    private lateinit var cloudSpriteView: SpriteView
+    private lateinit var eyesImageView: ImageView
+    private lateinit var mouthImageView: ImageView
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
     {
         return inflater.inflate(R.layout.fragment_kumo, container, false)
     }
 
-    public fun changeKumosShape(_valueColor: KumoColor, _valueEyes: KumosEyes, _valueMouth: KumoMouth)
+    fun init()
     {
-        val cloudSpriteView = view?.findViewById<SpriteView>(R.id.kumo_spriteView)!!
-        val eyesImageView = view?.findViewById<ImageView>(R.id.eyes_imageView)!!
-        val mouthImageView = view?.findViewById<ImageView>(R.id.mouth_imageView)!!
+        cloudSpriteView = view?.findViewById(R.id.kumo_spriteView)!!
+        eyesImageView = view?.findViewById(R.id.eyes_imageView)!!
+        mouthImageView = view?.findViewById(R.id.mouth_imageView)!!
+    }
+
+    fun changeKumosShape(_valueColor: KumoColor, _valueEyes: KumosEyes, _valueMouth: KumoMouth)
+    {
+        eyes = _valueEyes
+        color = _valueColor
+        mouth = _valueMouth
 
         cloudSpriteView.renderRow = _valueColor.ordinal
 
         when (_valueEyes)
         {
-            KumosEyes.ANGRY ->
+            KumosEyes.ANGRY    ->
             {
                 Glide.with(this).load(R.raw.eye_angry).into(eyesImageView)
             }
-            KumosEyes.HAPPY ->
+            KumosEyes.HAPPY    ->
             {
                 Glide.with(this).load(R.raw.eye).into(eyesImageView)
             }
 
-            KumosEyes.SAD   ->
+            KumosEyes.SAD      ->
             {
                 Glide.with(this).load(R.raw.eye_sad).into(eyesImageView)
+            }
+
+            KumosEyes.SLEEPING ->
+            {
+                Glide.with(this).load(R.raw.eye_closed).into(eyesImageView)
             }
         }
 
