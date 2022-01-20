@@ -534,24 +534,25 @@ class MainActivity : AppCompatActivity()
                 {
                     if (isDay) bgVideoView.setVideoPath(resPath + R.raw.day_fog)
                     else bgVideoView.setVideoPath(resPath + R.raw.night_fog)
-                    kumofragment.changeKumosShape(KumoColor.WHITE, KumosEyes.SAD, KumoMouth.SAD)
+                    kumofragment.changeKumosShape(KumoColor.GRAY, KumosEyes.SAD, KumoMouth.SAD)
                 }
                 "Mist" ->
                 {
                     if (isDay) bgVideoView.setVideoPath(resPath + R.raw.day_fog)
                     else bgVideoView.setVideoPath(resPath + R.raw.night_fog)
-                    kumofragment.changeKumosShape(KumoColor.WHITE, KumosEyes.SAD, KumoMouth.SAD)
+                    kumofragment.changeKumosShape(KumoColor.GRAY, KumosEyes.SAD, KumoMouth.SAD)
                 }
                 "Rain" ->
                 {
                     if (isDay) bgVideoView.setVideoPath(resPath + R.raw.rain)
                     else bgVideoView.setVideoPath(resPath + R.raw.rain_night)
-                    kumofragment.changeKumosShape(KumoColor.WHITE, KumosEyes.SAD, KumoMouth.SAD)
+                    kumofragment.changeKumosShape(KumoColor.GRAY, KumosEyes.SAD, KumoMouth.SAD)
                 }
                 "Snow" ->
                 {
                     if (isDay) bgVideoView.setVideoPath(resPath + R.raw.snow_day)
                     else bgVideoView.setVideoPath(resPath + R.raw.snow_night)
+                    kumofragment.changeKumosShape(KumoColor.WHITE, KumosEyes.HAPPY, KumoMouth.HAPPY)
                 }
                 else   ->
                 {
