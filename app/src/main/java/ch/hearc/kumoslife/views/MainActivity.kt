@@ -304,7 +304,7 @@ class MainActivity : AppCompatActivity()
                     button.isEnabled = false
                 }
                 lightBg.visibility = View.VISIBLE
-                
+
                 kumofragment.changeKumosShape(kumofragment.getColor(), KumosEyes.SLEEPING, kumofragment.getMouth())
             }
         }
@@ -361,7 +361,7 @@ class MainActivity : AppCompatActivity()
                 amplitudes[currentAmplitude] = amplitude
 
                 val max = amplitudes.maxOrNull() ?: 0.0
-                if (max > 150.0)
+                if (max > 170.0)
                 {
                     Toast.makeText(applicationContext, "Stop yelling at Kumo, it's loud enough !", Toast.LENGTH_SHORT).show()
                     Log.i(TAG, "Stop yelling at Kumo !")
