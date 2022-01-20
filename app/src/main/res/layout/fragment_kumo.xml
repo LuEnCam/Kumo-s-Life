@@ -32,7 +32,7 @@
         app:layout_constraintEnd_toEndOf="@+id/kumo_spriteView"
         app:layout_constraintStart_toStartOf="@+id/kumo_spriteView"
         app:layout_constraintTop_toTopOf="@+id/kumo_spriteView"
-        app:srcCompat="@raw/eye" />
+        app:srcCompat="@drawable/eye" />
 
     <ImageView
         android:id="@+id/mouth_imageView"

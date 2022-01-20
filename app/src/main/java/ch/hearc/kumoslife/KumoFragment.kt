@@ -75,21 +75,21 @@ class KumoFragment : Fragment()
         {
             KumosEyes.ANGRY    ->
             {
-                Glide.with(this).load(R.raw.eye_angry).into(eyesImageView)
+                Glide.with(this).load(R.drawable.eye_angry).into(eyesImageView)
             }
             KumosEyes.HAPPY    ->
             {
-                Glide.with(this).load(R.raw.eye).into(eyesImageView)
+                Glide.with(this).load(R.drawable.eye).into(eyesImageView)
             }
 
             KumosEyes.SAD      ->
             {
-                Glide.with(this).load(R.raw.eye_sad).into(eyesImageView)
+                Glide.with(this).load(R.drawable.eye_sad).into(eyesImageView)
             }
 
             KumosEyes.SLEEPING ->
             {
-                Glide.with(this).load(R.raw.eye_closed).into(eyesImageView)
+                Glide.with(this).load(R.drawable.eye_closed).into(eyesImageView)
             }
         }
 
