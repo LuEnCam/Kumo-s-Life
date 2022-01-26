@@ -30,7 +30,8 @@ class MinigameFruit(x: Float, y: Float, context: Activity) {
         view.id = ImageView.generateViewId()
 
         Log.i("MinigameFruit", "New fruit view with id: ${view.id}")
-        
+
+        // all possible fruit variants as a ressource ID
         val fruits = arrayOf(
             R.drawable.apple,
             R.drawable.apricot,
@@ -45,7 +46,7 @@ class MinigameFruit(x: Float, y: Float, context: Activity) {
         view.setImageResource(fruits[Random.nextInt(fruits.size)])
     }
 
-    // get rekt
+    // get rekt, returns the fruit's bounding box to be used for collision detection
     fun getRect(): Rect
     {
         return Rect(
