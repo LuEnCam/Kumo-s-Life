@@ -124,6 +124,20 @@ class MainActivity : AppCompatActivity()
                     val returnedData = data.extras!!.get(MinigameActivity.MINIGAME_COLLECTED_ID) as Int
                     //Toast.makeText(this, "Collected $returnedData unit(s) of FROOTS", Toast.LENGTH_SHORT).show()
                     addMoney(returnedData)
+
+                    val activityStat: Statistic? = statisticViewModel.getStatisticByName("Activity")
+                    if (activityStat != null)
+                    {
+                        Log.i(TAG, "Need for Actvitiy has been decreased")
+                        statisticViewModel.decrease(10.0, activityStat)
+                    }
+
+                    val sicknessStat: Statistic? = statisticViewModel.getStatisticByName("Sickness")
+                    if (sicknessStat != null)
+                    {
+                        Log.i(TAG, "Sickness has been decreased") // "high health" actually represents an unealthy Kumo, the meaning is inveted
+                        statisticViewModel.decrease(5.0, sicknessStat)
+                    }
                 }
             }
         }
